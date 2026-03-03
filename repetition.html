@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyric Looper: Abstraction with Lists & Loops</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap');
+        
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        .lyric-card {
+            transition: all 0.3s ease;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-blue-400 mb-2">Lyric Looper: Baby Shark Edition 🦈</h1>
+            <p class="text-slate-400">Watch how <b>Lists</b> store data and <b>Loops</b> handle the repetition.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Left Side: Controls & Code Logic -->
+            <div class="bg-slate-800 rounded-xl p-6 shadow-2xl border border-slate-700">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold">Programming Method</h2>
+                    <div class="flex bg-slate-900 p-1 rounded-lg">
+                        <button id="btn-brute" onclick="setMethod('brute')" class="px-4 py-2 rounded-md transition-all bg-blue-600 text-white">Brute Force</button>
+                        <button id="btn-loop" onclick="setMethod('loop')" class="px-4 py-2 rounded-md transition-all text-slate-400 hover:text-white">Loop & List</button>
+                    </div>
+                </div>
+
+                <!-- Code Display Area -->
+                <div class="bg-black rounded-lg p-4 mb-6 code-font text-sm md:text-base border border-slate-600 overflow-x-auto min-h-[280px]">
+                    <div id="code-content" class="text-green-400">
+                        <!-- Code injected here -->
+                    </div>
+                </div>
+
+                <!-- Interactive Controls -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-2">Number of Family Members (Verses)</label>
+                        <input type="range" id="repeat-slider" min="1" max="6" value="3" 
+                               class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                               oninput="updateCount(this.value)">
+                        <div class="flex justify-between text-xs mt-2 text-slate-500">
+                            <span>1 (Baby)</span>
+                            <span id="count-display" class="text-blue-400 font-bold">3 Members</span>
+                            <span>6 (All)</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-900/30 p-4 rounded-lg border border-blue-500/30">
+                        <h3 class="text-blue-300 font-bold mb-1">Concept: <span id="concept-title">Repetition</span></h3>
+                        <p id="concept-desc" class="text-sm text-slate-300">
+                            In Brute Force, we write every single line manually. If the family gets bigger, the code gets longer!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: The Output (Song Lyrics) -->
+            <div class="flex flex-col">
+                <div class="bg-slate-900 rounded-xl p-6 shadow-2xl border border-slate-700 flex-grow h-[550px] flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold italic text-slate-400">Song Output</h2>
+                        <span id="line-counter" class="bg-slate-800 px-3 py-1 rounded-full text-xs font-mono text-blue-400 border border-slate-700">Lines: 0</span>
+                    </div>
+                    
+                    <div id="lyric-container" class="overflow-y-auto space-y-4 pr-2 flex-grow">
+                        <!-- Lyrics generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer / Lesson Recap -->
+        <footer class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-800/50 p-4 rounded-lg text-center border border-slate-700">
+                <p class="text-xs text-slate-500 uppercase tracking-widest mb-1">Code Length</p>
+                <p id="stat-lines" class="text-2xl font-bold">--</p>
+                <p class="text-xs text-slate-400">Lines of script</p>
+            </div>
+            <div class="bg-slate-800/50 p-4 rounded-lg text-center border border-slate-700">
+                <p class="text-xs text-slate-500 uppercase tracking-widest mb-1">Methodology</p>
+                <p id="stat-complexity" class="text-2xl font-bold">--</p>
+                <p class="text-xs text-slate-400">Logic type</p>
+            </div>
+            <div class="bg-slate-800/50 p-4 rounded-lg text-center border border-slate-700">
+                <p class="text-xs text-slate-500 uppercase tracking-widest mb-1">Scalability</p>
+                <p id="stat-effort" class="text-2xl font-bold">--</p>
+                <p class="text-xs text-slate-400">Ease of adding verses</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let currentMethod = 'brute';
+        let verseCount = 3;
+        const FAMILY = ["Baby", "Mommy", "Daddy", "Grandma", "Grandpa", "Hungry"];
+
+        function setMethod(method) {
+            currentMethod = method;
+            const btnBrute = document.getElementById('btn-brute');
+            const btnLoop = document.getElementById('btn-loop');
+            
+            if (method === 'brute') {
+                btnBrute.className = "px-4 py-2 rounded-md transition-all bg-blue-600 text-white";
+                btnLoop.className = "px-4 py-2 rounded-md transition-all text-slate-400 hover:text-white";
+            } else {
+                btnLoop.className = "px-4 py-2 rounded-md transition-all bg-green-600 text-white";
+                btnBrute.className = "px-4 py-2 rounded-md transition-all text-slate-400 hover:text-white";
+            }
+            render();
+        }
+
+        function updateCount(val) {
+            verseCount = parseInt(val);
+            document.getElementById('count-display').innerText = `${verseCount} Members`;
+            render();
+        }
+
+        function render() {
+            renderCode();
+            renderLyrics();
+            updateStats();
+        }
+
+        function renderCode() {
+            const container = document.getElementById('code-content');
+            const title = document.getElementById('concept-title');
+            const desc = document.getElementById('concept-desc');
+
+            if (currentMethod === 'brute') {
+                title.innerText = "Hard-Coded Strings";
+                desc.innerText = "Each verse is written out manually. If you want to add a 'Uncle Shark', you'd have to copy and paste 4 more print lines.";
+                
+                let codeHtml = "";
+                for (let i = 0; i < verseCount; i++) {
+                    let name = FAMILY[i];
+                    codeHtml += `<span class="text-slate-500 italic">// Verse for ${name}</span><br>`;
+                    codeHtml += `print("${name} shark, doo doo...")<br>`;
+                    codeHtml += `print("${name} shark, doo doo...")<br>`;
+                    codeHtml += `print("${name} shark, doo doo...")<br>`;
+                    codeHtml += `print("${name} shark!")<br><br>`;
+                    if (i === 1 && verseCount > 2) {
+                        codeHtml += `<span class="text-slate-500 italic">// ... repeat for ${verseCount - 2} more members ...</span><br>`;
+                        break;
+                    }
+                }
+                container.innerHTML = codeHtml;
+            } else {
+                title.innerText = "Nested Loops + Arrays";
+                desc.innerText = "We store the family in a List. The outer loop picks a shark, and the inner loop prints the 'doo doo' lines. Adding a shark is now just adding one word to the list!";
+                
+                container.innerHTML = `
+<span class="text-pink-400">let</span> family = [<span class="text-yellow-200">"${FAMILY.slice(0, verseCount).join('", "')}"</span>]<br><br>
+<span class="text-pink-400">for</span> (member <span class="text-pink-400">in</span> family) {<br>
+&nbsp;&nbsp;<span class="text-pink-400">for</span> (i = 0; i < 3; i++) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print(member + <span class="text-yellow-200">" shark, doo doo..."</span>)<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;print(member + <span class="text-yellow-200">" shark!"</span>)<br>
+}
+                `;
+            }
+        }
+
+        function renderLyrics() {
+            const container = document.getElementById('lyric-container');
+            const lineCounter = document.getElementById('line-counter');
+            container.innerHTML = "";
+            let totalLines = 0;
+            
+            for (let i = 0; i < verseCount; i++) {
+                let name = FAMILY[i];
+                const verseDiv = document.createElement('div');
+                verseDiv.className = "bg-slate-800/40 p-3 rounded-lg border border-slate-700";
+                
+                let lines = [
+                    `${name} shark, doo doo doo doo doo doo`,
+                    `${name} shark, doo doo doo doo doo doo`,
+                    `${name} shark, doo doo doo doo doo doo`,
+                    `${name} shark!`
+                ];
+
+                lines.forEach(text => {
+                    const line = document.createElement('p');
+                    line.className = "text-sm md:text-base mb-1 font-medium";
+                    line.innerText = text;
+                    verseDiv.appendChild(line);
+                    totalLines++;
+                });
+
+                container.appendChild(verseDiv);
+            }
+            lineCounter.innerText = `Total Lines Printed: ${totalLines}`;
+        }
+
+        function updateStats() {
+            const sLines = document.getElementById('stat-lines');
+            const sComp = document.getElementById('stat-complexity');
+            const sEffort = document.getElementById('stat-effort');
+
+            if (currentMethod === 'brute') {
+                sLines.innerText = `${verseCount * 4} lines`;
+                sLines.className = "text-2xl font-bold text-red-400";
+                sComp.innerText = "Manual";
+                sComp.className = "text-2xl font-bold text-red-400";
+                sEffort.innerText = "Hard";
+                sEffort.className = "text-2xl font-bold text-red-400";
+            } else {
+                sLines.innerText = `7 lines`;
+                sLines.className = "text-2xl font-bold text-green-400";
+                sComp.innerText = "Automated";
+                sComp.className = "text-2xl font-bold text-green-400";
+                sEffort.innerText = "Easy";
+                sEffort.className = "text-2xl font-bold text-green-400";
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>
