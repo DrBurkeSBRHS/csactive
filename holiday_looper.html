@@ -200,7 +200,7 @@
                 for (let i = 0; i < dayCount; i++) {
                     codeHtml += `<div class="mb-6 pb-4 border-b border-slate-800">`;
                     codeHtml += `<span class="text-slate-500 italic">// Logic for Day ${i+1}</span><br>`;
-                    codeHtml += `<span class="text-blue-300 italic">print</span>(<span class="text-yellow-200">"On the ${DAYS[i]} day of Christmas..."</span>)<br>`;
+                    codeHtml += `<span class="text-blue-300 italic">print</span>(<span class="text-yellow-200">"On the ${DAYS[i]} day of Christmas my true love sent to me:"</span>)<br>`;
                     for (let j = i; j >= 0; j--) {
                         let gift = GIFTS[j];
                         if (i > 0 && j === 0) gift = "And " + gift.toLowerCase();
@@ -213,20 +213,25 @@
                 title.innerText = "The Power of Loops";
                 desc.innerText = "The logic describes the *pattern* rather than the *data*. This code never grows, no matter how many days are added.";
                 
+                let daysList = DAYS.map(d => `&nbsp;&nbsp;<span class="text-yellow-200">"${d}"</span>`).join(",<br>");
                 let giftsList = GIFTS.map(g => `&nbsp;&nbsp;<span class="text-yellow-200">"${g}"</span>`).join(",<br>");
 
                 container.innerHTML = `
 <div class="mb-4">
+<span class="text-pink-400">const</span> days = [<br>
+${daysList}<br>
+];<br><br>
+
 <span class="text-pink-400">const</span> gifts = [<br>
 ${giftsList}<br>
 ];<br><br>
 
-<span class="text-slate-500 italic">// Outer Loop: For each day</span><br>
-<span class="text-pink-400">for</span> (day = 0; day < <span class="text-orange-400">${dayCount}</span>; day++) {<br>
-&nbsp;&nbsp;print(<span class="text-yellow-200">"On the "</span> + days[day] + <span class="text-yellow-200">" day..."</span>)<br><br>
-&nbsp;&nbsp;<span class="text-slate-500 italic">// Inner Loop: Count down the gifts</span><br>
-&nbsp;&nbsp;<span class="text-pink-400">for</span> (j = day; j >= 0; j--) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;print(gifts[j])<br>
+<span class="text-slate-500 italic">// Outer Loop: Runs once for each of the ${dayCount} days</span><br>
+<span class="text-pink-400">for</span> (dayIndex = 0; dayIndex < <span class="text-orange-400">${dayCount}</span>; dayIndex++) {<br>
+&nbsp;&nbsp;<span class="text-blue-300 italic">print</span>(<span class="text-yellow-200">"On the "</span> + days[dayIndex] + <span class="text-yellow-200">" day of Christmas my true love sent to me:"</span>)<br><br>
+&nbsp;&nbsp;<span class="text-slate-500 italic">// Inner Loop: Counts down from the current day to the first gift</span><br>
+&nbsp;&nbsp;<span class="text-pink-400">for</span> (itemIndex = dayIndex; itemIndex >= 0; itemIndex--) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-blue-300 italic">print</span>(gifts[itemIndex])<br>
 &nbsp;&nbsp;}<br>
 }
 </div>
@@ -298,7 +303,7 @@ ${giftsList}<br>
                 sComp.innerText = "1:1";
                 sComp.className = "text-2xl font-bold text-slate-400";
             } else {
-                const loopCodeLines = 12 + GIFTS.length; // Array lines + loop logic
+                const loopCodeLines = 15 + GIFTS.length + DAYS.length; // Arrays + loop logic
                 sLines.innerText = `${loopCodeLines} lines`;
                 sLines.className = "text-2xl font-bold text-green-400";
                 const ratio = (outputLines / loopCodeLines).toFixed(1);
