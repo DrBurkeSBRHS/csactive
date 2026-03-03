@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holiday Looper: Nested Logic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap');
+        
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        #code-content-wrapper {
+            scrollbar-width: thin;
+            scrollbar-color: #475569 #000;
+        }
+
+        .bar-transition {
+            transition: height 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-red-400 mb-2">Holiday Looper: 12 Days Edition 🎄</h1>
+            <p class="text-slate-400">Mastering <b>Variable Loops</b>. Watch the code size vs. logic complexity!</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Left Side: Controls & Code Logic -->
+            <div class="bg-slate-800 rounded-xl p-6 shadow-2xl border border-slate-700">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold">Programming Method</h2>
+                    <div class="flex bg-slate-900 p-1 rounded-lg">
+                        <button id="btn-brute" onclick="setMethod('brute')" class="px-4 py-2 rounded-md transition-all bg-blue-600 text-white">Brute Force</button>
+                        <button id="btn-loop" onclick="setMethod('loop')" class="px-4 py-2 rounded-md transition-all text-slate-400 hover:text-white">Nested Loop</button>
+                    </div>
+                </div>
+
+                <!-- Code Display Area -->
+                <div id="code-content-wrapper" class="bg-black rounded-lg p-4 mb-6 code-font text-sm md:text-base border border-slate-600 overflow-y-auto h-[400px]">
+                    <div id="code-content" class="text-green-400">
+                        <!-- Code injected here -->
+                    </div>
+                </div>
+
+                <!-- Interactive Controls -->
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm font-medium text-slate-400">Current Day of Christmas</label>
+                            <span id="count-display" class="bg-red-900 text-red-200 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider">Day 4</span>
+                        </div>
+                        <input type="range" id="repeat-slider" min="1" max="12" value="4" 
+                               class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-red-500"
+                               oninput="updateCount(this.value)">
+                        <div class="flex justify-between text-[10px] mt-2 text-slate-500 font-mono">
+                            <span>DAY 01</span>
+                            <span>DAY 04</span>
+                            <span>DAY 08</span>
+                            <span>DAY 12</span>
+                        </div>
+                    </div>
+
+                    <!-- Complexity Visualizer -->
+                    <div class="bg-slate-900/50 p-4 rounded-lg border border-slate-700">
+                        <h3 class="text-slate-300 text-xs font-bold uppercase mb-3 flex justify-between">
+                            Computational Effort (Total Instructions)
+                            <span id="instruction-count" class="text-red-400">0</span>
+                        </h3>
+                        <div class="flex items-end gap-1 h-16 w-full" id="complexity-graph">
+                            <!-- Bars injected here -->
+                        </div>
+                    </div>
+
+                    <div class="bg-red-900/20 p-4 rounded-lg border border-red-500/30">
+                        <h3 class="text-red-300 font-bold mb-1">Concept: <span id="concept-title">Variable Ranges</span></h3>
+                        <p id="concept-desc" class="text-sm text-slate-300">
+                            In Brute Force, we must write every line. In the Loop, we use an <b>Accumulator Pattern</b>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: The Output (Song Lyrics) -->
+            <div class="flex flex-col">
+                <div class="bg-slate-900 rounded-xl p-6 shadow-2xl border border-slate-700 flex-grow h-[650px] flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold italic text-slate-400">Song Output</h2>
+                        <span id="line-counter" class="bg-slate-800 px-3 py-1 rounded-full text-xs font-mono text-red-400 border border-slate-700">Lines: 0</span>
+                    </div>
+                    
+                    <div id="lyric-container" class="overflow-y-auto space-y-4 pr-2 flex-grow">
+                        <!-- Lyrics generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer / Lesson Recap -->
+        <footer class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-slate-800/50 p-4 rounded-lg text-center border border-slate-700">
+                <p class="text-xs text-slate-500 uppercase tracking-widest mb-1">Code File Size</p>
+                <p id="stat-lines" class="text-2xl font-bold">--</p>
+                <p class="text-xs text-slate-400">Lines in source code</p>
+            </div>
+            <div class="bg-slate-800/50 p-4 rounded-lg text-center border border-slate-700">
+                <p class="text-xs text-slate-500 uppercase tracking-widest mb-1">Logic Ratio</p>
+                <p id="stat-complexity" class="text-2xl font-bold">--</p>
+                <p class="text-xs text-slate-400">Output vs. Code Length</p>
+            </div>
+            <div class="bg-slate-800/50 p-4 rounded-lg text-center border border-slate-700">
+                <p class="text-xs text-slate-500 uppercase tracking-widest mb-1">Growth Pattern</p>
+                <p id="stat-effort" class="text-2xl font-bold">Quadratic</p>
+                <p class="text-xs text-slate-400">Complexity: O(n²)</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let currentMethod = 'brute';
+        let dayCount = 4;
+        const DAYS = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth", "eleventh", "twelfth"];
+        const GIFTS = [
+            "A partridge in a pear tree",
+            "Two turtle doves",
+            "Three French hens",
+            "Four calling birds",
+            "Five golden rings",
+            "Six geese a-laying",
+            "Seven swans a-swimming",
+            "Eight maids a-milking",
+            "Nine ladies dancing",
+            "Ten lords a-leaping",
+            "Eleven pipers piping",
+            "Twelve drummers drumming"
+        ];
+
+        function setMethod(method) {
+            currentMethod = method;
+            const btnBrute = document.getElementById('btn-brute');
+            const btnLoop = document.getElementById('btn-loop');
+            
+            if (method === 'brute') {
+                btnBrute.className = "px-4 py-2 rounded-md transition-all bg-blue-600 text-white";
+                btnLoop.className = "px-4 py-2 rounded-md transition-all text-slate-400 hover:text-white";
+            } else {
+                btnLoop.className = "px-4 py-2 rounded-md transition-all bg-red-600 text-white";
+                btnBrute.className = "px-4 py-2 rounded-md transition-all text-slate-400 hover:text-white";
+            }
+            render();
+        }
+
+        function updateCount(val) {
+            dayCount = parseInt(val);
+            document.getElementById('count-display').innerText = `Day ${dayCount}`;
+            render();
+        }
+
+        function render() {
+            renderCode();
+            renderLyrics();
+            updateStats();
+            renderGraph();
+        }
+
+        function renderCode() {
+            const container = document.getElementById('code-content');
+            const title = document.getElementById('concept-title');
+            const desc = document.getElementById('concept-desc');
+
+            if (currentMethod === 'brute') {
+                title.innerText = "Explicit Repetition";
+                desc.innerText = "Every single gift must be manually coded for every single day. Scroll down to see how quickly this becomes unmanageable!";
+                
+                let codeHtml = "";
+                for (let i = 0; i < dayCount; i++) {
+                    codeHtml += `<div class="mb-6 pb-4 border-b border-slate-800">`;
+                    codeHtml += `<span class="text-slate-500 italic">// Logic for Day ${i+1}</span><br>`;
+                    codeHtml += `<span class="text-blue-300 italic">print</span>(<span class="text-yellow-200">"On the ${DAYS[i]} day of Christmas..."</span>)<br>`;
+                    for (let j = i; j >= 0; j--) {
+                        let gift = GIFTS[j];
+                        if (i > 0 && j === 0) gift = "And " + gift.toLowerCase();
+                        codeHtml += `<span class="text-blue-300 italic">print</span>(<span class="text-yellow-200">"${gift}"</span>)<br>`;
+                    }
+                    codeHtml += `</div>`;
+                }
+                container.innerHTML = codeHtml;
+            } else {
+                title.innerText = "The Power of Loops";
+                desc.innerText = "The logic describes the *pattern* rather than the *data*. This code never grows, no matter how many days are added.";
+                
+                let giftsList = GIFTS.map(g => `&nbsp;&nbsp;<span class="text-yellow-200">"${g}"</span>`).join(",<br>");
+
+                container.innerHTML = `
+<div class="mb-4">
+<span class="text-pink-400">const</span> gifts = [<br>
+${giftsList}<br>
+];<br><br>
+
+<span class="text-slate-500 italic">// Outer Loop: For each day</span><br>
+<span class="text-pink-400">for</span> (day = 0; day < <span class="text-orange-400">${dayCount}</span>; day++) {<br>
+&nbsp;&nbsp;print(<span class="text-yellow-200">"On the "</span> + days[day] + <span class="text-yellow-200">" day..."</span>)<br><br>
+&nbsp;&nbsp;<span class="text-slate-500 italic">// Inner Loop: Count down the gifts</span><br>
+&nbsp;&nbsp;<span class="text-pink-400">for</span> (j = day; j >= 0; j--) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print(gifts[j])<br>
+&nbsp;&nbsp;}<br>
+}
+</div>
+                `;
+            }
+        }
+
+        function renderLyrics() {
+            const container = document.getElementById('lyric-container');
+            const lineCounter = document.getElementById('line-counter');
+            container.innerHTML = "";
+            let totalLines = 0;
+            
+            for (let i = 0; i < dayCount; i++) {
+                const verseDiv = document.createElement('div');
+                verseDiv.className = "bg-slate-800/40 p-4 rounded-lg border border-slate-700";
+                
+                const header = document.createElement('p');
+                header.className = "text-red-400 font-bold mb-2";
+                header.innerText = `On the ${DAYS[i]} day of Christmas my true love sent to me:`;
+                verseDiv.appendChild(header);
+                totalLines++;
+
+                for (let j = i; j >= 0; j--) {
+                    const item = document.createElement('p');
+                    item.className = "text-sm md:text-base mb-1";
+                    let giftText = GIFTS[j];
+                    if (i > 0 && j === 0) giftText = "And " + giftText.toLowerCase();
+                    item.innerText = giftText;
+                    verseDiv.appendChild(item);
+                    totalLines++;
+                }
+
+                container.appendChild(verseDiv);
+            }
+            lineCounter.innerText = `Output Generated: ${totalLines} Lines`;
+        }
+
+        function renderGraph() {
+            const graph = document.getElementById('complexity-graph');
+            const instText = document.getElementById('instruction-count');
+            graph.innerHTML = "";
+            
+            let total = 0;
+            for (let i = 1; i <= 12; i++) {
+                const bar = document.createElement('div');
+                const height = (i * (i + 1)) / 2; // Cumulative gifts
+                const isActive = i <= dayCount;
+                
+                bar.className = `flex-grow bar-transition rounded-t-sm ${isActive ? 'bg-red-500' : 'bg-slate-700'}`;
+                bar.style.height = `${(height / 78) * 100}%`;
+                graph.appendChild(bar);
+
+                if (isActive) total = height + i; // gifts + daily headers
+            }
+            instText.innerText = total;
+        }
+
+        function updateStats() {
+            const sLines = document.getElementById('stat-lines');
+            const sComp = document.getElementById('stat-complexity');
+
+            const outputLines = (dayCount * (dayCount + 1)) / 2 + dayCount;
+            
+            if (currentMethod === 'brute') {
+                const bruteCodeLines = outputLines + dayCount; // Code + Comments
+                sLines.innerText = `${Math.round(bruteCodeLines)} lines`;
+                sLines.className = "text-2xl font-bold text-red-400";
+                sComp.innerText = "1:1";
+                sComp.className = "text-2xl font-bold text-slate-400";
+            } else {
+                const loopCodeLines = 12 + GIFTS.length; // Array lines + loop logic
+                sLines.innerText = `${loopCodeLines} lines`;
+                sLines.className = "text-2xl font-bold text-green-400";
+                const ratio = (outputLines / loopCodeLines).toFixed(1);
+                sComp.innerText = `${ratio}:1`;
+                sComp.className = "text-2xl font-bold text-green-400";
+            }
+        }
+
+        window.onload = render;
+    </script>
+</body>
+</html>
