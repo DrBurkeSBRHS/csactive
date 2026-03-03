@@ -18,10 +18,6 @@
             font-family: 'Fira Code', monospace;
         }
 
-        .lyric-card {
-            transition: all 0.3s ease;
-        }
-
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -32,6 +28,11 @@
         ::-webkit-scrollbar-thumb {
             background: #475569;
             border-radius: 4px;
+        }
+
+        #code-content-wrapper {
+            scrollbar-width: thin;
+            scrollbar-color: #475569 #000;
         }
     </style>
 </head>
@@ -56,7 +57,7 @@
                 </div>
 
                 <!-- Code Display Area -->
-                <div class="bg-black rounded-lg p-4 mb-6 code-font text-sm md:text-base border border-slate-600 overflow-x-auto min-h-[280px]">
+                <div id="code-content-wrapper" class="bg-black rounded-lg p-4 mb-6 code-font text-sm md:text-base border border-slate-600 overflow-y-auto h-[350px]">
                     <div id="code-content" class="text-green-400">
                         <!-- Code injected here -->
                     </div>
@@ -159,25 +160,23 @@
 
             if (currentMethod === 'brute') {
                 title.innerText = "Hard-Coded Strings";
-                desc.innerText = "Each verse is written out manually. If you want to add a 'Uncle Shark', you'd have to copy and paste 4 more print lines.";
+                desc.innerText = "Notice how the scrollbar appears! Each verse is written out manually. To add one more shark, we'd have to manually write 5 more lines of code.";
                 
                 let codeHtml = "";
                 for (let i = 0; i < verseCount; i++) {
                     let name = FAMILY[i];
+                    codeHtml += `<div class="mb-4">`;
                     codeHtml += `<span class="text-slate-500 italic">// Verse for ${name}</span><br>`;
                     codeHtml += `print("${name} shark, doo doo...")<br>`;
                     codeHtml += `print("${name} shark, doo doo...")<br>`;
                     codeHtml += `print("${name} shark, doo doo...")<br>`;
-                    codeHtml += `print("${name} shark!")<br><br>`;
-                    if (i === 1 && verseCount > 2) {
-                        codeHtml += `<span class="text-slate-500 italic">// ... repeat for ${verseCount - 2} more members ...</span><br>`;
-                        break;
-                    }
+                    codeHtml += `print("${name} shark!")`;
+                    codeHtml += `</div>`;
                 }
                 container.innerHTML = codeHtml;
             } else {
                 title.innerText = "Nested Loops + Arrays";
-                desc.innerText = "We store the family in a List. The outer loop picks a shark, and the inner loop prints the 'doo doo' lines. Adding a shark is now just adding one word to the list!";
+                desc.innerText = "The code length stays exactly the same, no matter how many sharks you add. The loop handles the work for us!";
                 
                 container.innerHTML = `
 <span class="text-pink-400">let</span> family = [<span class="text-yellow-200">"${FAMILY.slice(0, verseCount).join('", "')}"</span>]<br><br>
@@ -228,7 +227,8 @@
             const sEffort = document.getElementById('stat-effort');
 
             if (currentMethod === 'brute') {
-                sLines.innerText = `${verseCount * 4} lines`;
+                const manualLines = (verseCount * 5); // 4 prints + 1 comment per verse
+                sLines.innerText = `${manualLines} lines`;
                 sLines.className = "text-2xl font-bold text-red-400";
                 sComp.innerText = "Manual";
                 sComp.className = "text-2xl font-bold text-red-400";
