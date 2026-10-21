@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>400x400 Vector Grid Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            cyan: '#00f3ff',
+                            amber: '#f59e0b',
+                            purple: '#c084fc',
+                            dark: '#070a12',
+                            card: '#0f172a',
+                            border: '#1e293b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #070a12;
+            color: #f1f5f9;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f3ff;
+        }
+        canvas {
+            touch-action: none;
+        }
+        .tab-active {
+            border-bottom: 2px solid #00f3ff;
+            color: #00f3ff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-200 antialiased selection:bg-cyan-500 selection:text-black">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Header Toolbar -->
+    <header class="border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-3">
+            
+            <!-- Title & Extent Badge -->
+            <div class="flex items-center gap-3 shrink-0">
+                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/40 flex items-center justify-center text-cyan-400 font-bold text-sm shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-sm font-semibold text-white tracking-wide flex items-center gap-2">
+                        Vector Grid <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-cyan-400 border border-slate-800 mono">400×400</span>
+                    </h1>
+                    <p class="text-[10px] text-slate-400 hidden sm:block">Closed Loop Vector Canvas • Scale, Shift & Edit Studio</p>
+                </div>
+            </div>
+
+            <!-- Top Actions Toolbar -->
+            <div class="flex items-center gap-2 overflow-x-auto py-1">
+                <!-- Snap Settings -->
+                <label class="flex items-center gap-1.5 cursor-pointer select-none text-xs text-slate-300 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 px-2.5 py-1.5 rounded-lg transition shrink-0">
+                    <input type="checkbox" id="chk-snap-grid" checked class="w-3.5 h-3.5 rounded bg-slate-950 border-slate-700 text-cyan-500 focus:ring-0">
+                    <span class="font-medium text-[11px]">Snap</span>
+                    <select id="select-grid-step" class="bg-slate-950 border border-slate-800 text-[11px] text-cyan-400 rounded px-1.5 py-0.5 mono outline-none focus:border-cyan-500">
+                        <option value="1">1px</option>
+                        <option value="5">5px</option>
+                        <option value="10" selected>10px</option>
+                        <option value="20">20px</option>
+                    </select>
+                </label>
+
+                <div class="h-4 w-px bg-slate-800 shrink-0"></div>
+
+                <!-- Quick Center Button -->
+                <button id="btn-quick-center" title="Center polygon in 400x400 grid" class="px-2.5 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-lg border border-slate-800 transition flex items-center gap-1.5 active:scale-95 shrink-0">
+                    <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Center
+                </button>
+
+                <!-- Quick Fit Button -->
+                <button id="btn-quick-fit" title="Fit polygon inside 400x400 grid with margin" class="px-2.5 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-lg border border-slate-800 transition flex items-center gap-1.5 active:scale-95 shrink-0">
+                    <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                    Fit
+                </button>
+
+                <div class="h-4 w-px bg-slate-800 shrink-0"></div>
+
+                <!-- Undo / Redo -->
+                <div class="flex items-center gap-1 shrink-0">
+                    <button id="btn-undo" title="Undo (Ctrl+Z)" class="p-1.5 text-slate-300 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:pointer-events-none rounded-lg border border-slate-800 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                    </button>
+                    <button id="btn-redo" title="Redo (Ctrl+Y)" class="p-1.5 text-slate-300 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:pointer-events-none rounded-lg border border-slate-800 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10H11a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6"></path></svg>
+                    </button>
+                </div>
+
+                <!-- Clear Button -->
+                <button id="btn-clear" title="Clear all points" class="px-2.5 py-1.5 text-xs font-medium bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 rounded-lg border border-rose-900/50 transition flex items-center gap-1.5 active:scale-95 shrink-0">
+                    <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Clear
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <main class="max-w-7xl mx-auto px-4 py-5 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT COLUMN: Grid Canvas & Viewport (5/12 cols) -->
+        <div class="lg:col-span-5 flex flex-col items-center gap-4">
+            
+            <div class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-2xl backdrop-blur flex flex-col items-center">
+                
+                <!-- Viewport Header Info -->
+                <div class="w-full flex items-center justify-between mb-3 text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                        <span class="font-semibold text-slate-300 uppercase tracking-wider text-[11px]">400×400 Grid</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-800/80">
+                        <span class="text-slate-500 font-medium text-[10px]">MOUSE:</span>
+                        <span id="hover-coord" class="mono text-cyan-400 font-semibold">(0, 0)</span>
+                    </div>
+                </div>
+
+                <!-- Interactive 400x400 Canvas Container -->
+                <div class="relative w-full aspect-square max-w-[460px] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 shadow-inner group cursor-crosshair">
+                    <canvas id="gridCanvas" class="w-full h-full block"></canvas>
+
+                    <!-- Corner Extents Labels -->
+                    <div class="absolute top-1 left-1.5 text-[9px] mono text-cyan-400/80 pointer-events-none select-none">(0,0)</div>
+                    <div class="absolute top-1 right-1.5 text-[9px] mono text-slate-500 pointer-events-none select-none">(400,0)</div>
+                    <div class="absolute bottom-1 left-1.5 text-[9px] mono text-slate-500 pointer-events-none select-none">(0,400)</div>
+                    <div class="absolute bottom-1 right-1.5 text-[9px] mono text-slate-500 pointer-events-none select-none">(400,400)</div>
+                </div>
+
+                <!-- Usage Hint Footer -->
+                <div class="w-full mt-3 text-[11px] text-slate-400 space-y-1 bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/60">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-300 font-medium flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Nearest Line Segment Insertion
+                        </span>
+                        <span class="text-slate-500 text-[10px]">Right-click to delete point</span>
+                    </div>
+                    <div class="text-[10px] text-slate-500 pl-5">
+                        • Click anywhere on grid to insert points into nearest closed loop segment.
+                        <br>• Drag points to adjust coordinates. Edit or paste text on the right.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Vector Metrics Grid Bar -->
+            <div class="w-full grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 shadow flex flex-col">
+                    <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Vertices</span>
+                    <span id="stat-points-count" class="text-base font-bold text-white mono mt-0.5">0</span>
+                </div>
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 shadow flex flex-col">
+                    <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Perimeter</span>
+                    <span id="stat-perimeter" class="text-base font-bold text-cyan-400 mono mt-0.5">0 <span class="text-[10px] text-slate-500 font-normal">px</span></span>
+                </div>
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 shadow flex flex-col">
+                    <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Area</span>
+                    <span id="stat-area" class="text-base font-bold text-amber-400 mono mt-0.5">0 <span class="text-[10px] text-slate-500 font-normal">px²</span></span>
+                </div>
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5 shadow flex flex-col">
+                    <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Bounds (W×H)</span>
+                    <span id="stat-bbox" class="text-base font-bold text-purple-400 mono mt-0.5">0×0</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: Tabs Panel (7/12 cols) -->
+        <div class="lg:col-span-7 flex flex-col gap-4">
+
+            <!-- Panel Navigation Tabs -->
+            <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+                <button id="tab-btn-paste" class="tab-btn tab-active px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    Paste & Export
+                </button>
+                <button id="tab-btn-transform" class="tab-btn text-slate-400 hover:text-slate-200 px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                    Batch Transform
+                </button>
+                <button id="tab-btn-table" class="tab-btn text-slate-400 hover:text-slate-200 px-3 py-1.5 text-xs font-medium flex items-center gap-1.5 transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                    Points Table
+                </button>
+            </div>
+
+            <!-- TAB CONTENT 1: Paste & Export Coordinates -->
+            <div id="tab-content-paste" class="tab-content flex flex-col gap-4">
+                
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col gap-3 relative">
+                    
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h2 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                Comma-Separated Coordinates
+                            </h2>
+                            <p class="text-[10px] text-slate-400">Paste or edit raw points below to load them onto the 400×400 canvas.</p>
+                        </div>
+
+                        <!-- Export Format Selector -->
+                        <div class="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800 gap-1">
+                            <button data-format="pairs" class="fmt-btn px-2.5 py-1 text-[10px] font-medium rounded transition text-cyan-400 bg-slate-800 border border-slate-700">
+                                (x, y) Pairs
+                            </button>
+                            <button data-format="flat" class="fmt-btn px-2.5 py-1 text-[10px] font-medium rounded transition text-slate-400 hover:text-slate-200">
+                                x, y Flat
+                            </button>
+                            <button data-format="compact" class="fmt-btn px-2.5 py-1 text-[10px] font-medium rounded transition text-slate-400 hover:text-slate-200">
+                                Compact
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Coordinates Textarea -->
+                    <div class="relative">
+                        <textarea id="csv-input-output" rows="5" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 font-mono text-xs text-cyan-300 focus:outline-none focus:border-cyan-500 transition leading-relaxed resize-y" placeholder="Paste points here, e.g. (50, 50), (350, 50), (350, 350) or 50,50, 350,50..."></textarea>
+                    </div>
+
+                    <!-- Parser Live Status & Action Buttons -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-950/80 p-2.5 rounded-xl border border-slate-800/80">
+                        <!-- Validation Indicator -->
+                        <div id="parser-status" class="text-[11px] mono text-slate-400 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+                            <span>Waiting for text input...</span>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button id="btn-import-replace" class="px-3 py-1.5 text-xs font-semibold bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg shadow-lg shadow-cyan-500/20 transition flex items-center gap-1.5 active:scale-95">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                Apply & Replace
+                            </button>
+                            <button id="btn-import-append" class="px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition flex items-center gap-1.5 active:scale-95">
+                                Append Points
+                            </button>
+                            <button id="btn-copy-coords" class="px-3 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition flex items-center gap-1.5 active:scale-95">
+                                <svg id="icon-copy" class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                <span id="txt-copy">Copy Output</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Format Samples -->
+                    <div class="text-[10px] text-slate-500 space-y-1 pl-1">
+                        <span class="font-semibold text-slate-400">Supported formats:</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 mono text-[10px]">
+                            <div>• Pairs: <code class="text-slate-400">(50, 50), (350, 50), (350, 350)</code></div>
+                            <div>• Flat: <code class="text-slate-400">50, 50, 350, 50, 350, 350</code></div>
+                            <div>• Space: <code class="text-slate-400">50 50, 350 50</code></div>
+                            <div>• JSON: <code class="text-slate-400">[[50,50],[350,50]]</code></div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- TAB CONTENT 2: Batch Scale & Offset Controls -->
+            <div id="tab-content-transform" class="tab-content hidden flex-col gap-4">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <!-- Section A: Offset / Shift & Nudge Pad -->
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col gap-3">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <h2 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                Offset / Shift
+                            </h2>
+                            <button id="btn-center-poly" class="text-[10px] font-medium text-cyan-400 hover:text-cyan-300 bg-cyan-950/40 hover:bg-cyan-900/60 px-2 py-0.5 rounded border border-cyan-800/50 transition">
+                                Center Polygon
+                            </button>
+                        </div>
+
+                        <!-- Shift X / Y Numeric Inputs -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-medium">Shift X (ΔX px)</label>
+                                <input type="number" id="input-shift-x" value="10" step="1" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs mono text-white focus:border-cyan-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-medium">Shift Y (ΔY px)</label>
+                                <input type="number" id="input-shift-y" value="10" step="1" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs mono text-white focus:border-cyan-500 outline-none">
+                            </div>
+                        </div>
+
+                        <button id="btn-apply-shift" class="w-full py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition active:scale-95">
+                            Apply Shift
+                        </button>
+
+                        <!-- Directional Nudge Pad -->
+                        <div class="mt-1 border-t border-slate-800/80 pt-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">4-Way Nudge</span>
+                                <div class="flex items-center gap-1 text-[10px]">
+                                    <span class="text-slate-500">Step:</span>
+                                    <select id="select-nudge-step" class="bg-slate-950 border border-slate-800 rounded px-1 text-cyan-400 mono outline-none">
+                                        <option value="1">1px</option>
+                                        <option value="5" selected>5px</option>
+                                        <option value="10">10px</option>
+                                        <option value="25">25px</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-1.5 w-36 mx-auto">
+                                <div></div>
+                                <button data-dir="up" class="btn-nudge p-2 bg-slate-950 hover:bg-slate-800 rounded-lg border border-slate-800 text-slate-300 flex items-center justify-center transition active:scale-90" title="Nudge Up">
+                                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                </button>
+                                <div></div>
+                                <button data-dir="left" class="btn-nudge p-2 bg-slate-950 hover:bg-slate-800 rounded-lg border border-slate-800 text-slate-300 flex items-center justify-center transition active:scale-90" title="Nudge Left">
+                                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                </button>
+                                <div class="flex items-center justify-center">
+                                    <span class="w-2 h-2 rounded-full bg-slate-700"></span>
+                                </div>
+                                <button data-dir="right" class="btn-nudge p-2 bg-slate-950 hover:bg-slate-800 rounded-lg border border-slate-800 text-slate-300 flex items-center justify-center transition active:scale-90" title="Nudge Right">
+                                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                </button>
+                                <div></div>
+                                <button data-dir="down" class="btn-nudge p-2 bg-slate-950 hover:bg-slate-800 rounded-lg border border-slate-800 text-slate-300 flex items-center justify-center transition active:scale-90" title="Nudge Down">
+                                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                                <div></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Section B: Scale & Pivot Controls -->
+                    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col gap-3">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <h2 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                                Scale & Resize
+                            </h2>
+                            <button id="btn-fit-grid" class="text-[10px] font-medium text-amber-400 hover:text-amber-300 bg-amber-950/40 hover:bg-amber-900/60 px-2 py-0.5 rounded border border-amber-800/50 transition">
+                                Fit to Grid
+                            </button>
+                        </div>
+
+                        <!-- Pivot Selection -->
+                        <div>
+                            <label class="text-[10px] text-slate-400 font-medium">Scale Pivot Center</label>
+                            <select id="select-pivot" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-200 outline-none focus:border-cyan-500">
+                                <option value="centroid" selected>Centroid (Center of Mass)</option>
+                                <option value="bounding">Bounding Box Center</option>
+                                <option value="origin">Origin (0, 0)</option>
+                            </select>
+                        </div>
+
+                        <!-- Uniform Scale Slider -->
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-[10px] text-slate-400 font-medium">Scale Factor</label>
+                                <span id="lbl-scale-val" class="mono text-xs text-amber-400 font-bold">100% (1.0x)</span>
+                            </div>
+                            <input type="range" id="slider-scale" min="10" max="300" value="100" class="w-full mt-1 accent-amber-400 bg-slate-950 rounded cursor-pointer">
+                        </div>
+
+                        <!-- Discrete Scale X & Y -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-medium">Scale X (%)</label>
+                                <input type="number" id="input-scale-x" value="100" min="10" max="500" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs mono text-white focus:border-amber-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-medium">Scale Y (%)</label>
+                                <input type="number" id="input-scale-y" value="100" min="10" max="500" class="w-full mt-1 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs mono text-white focus:border-amber-500 outline-none">
+                            </div>
+                        </div>
+
+                        <button id="btn-apply-scale" class="w-full py-1.5 text-xs font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg shadow-lg shadow-amber-500/20 transition active:scale-95">
+                            Apply Scale
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- TAB CONTENT 3: Synchronized Points Table -->
+            <div id="tab-content-table" class="tab-content hidden flex-col gap-4">
+                
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col min-h-[300px]">
+                    <div class="flex items-center justify-between mb-3 px-1">
+                        <h2 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            Interactive Points Sequence
+                            <span id="badge-count" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300 mono">0</span>
+                        </h2>
+                        <span class="text-[10px] text-slate-500 mono">P<sub>0</sub> → ... → P<sub>n-1</sub> → P<sub>0</sub></span>
+                    </div>
+
+                    <!-- Scrollable Table -->
+                    <div class="overflow-y-auto border border-slate-800/80 rounded-xl bg-slate-950 max-h-[320px]">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-900 text-slate-400 font-semibold sticky top-0 border-b border-slate-800 z-10 text-[11px]">
+                                <tr>
+                                    <th class="py-2 px-3">Point</th>
+                                    <th class="py-2 px-3">X Coord (0-400)</th>
+                                    <th class="py-2 px-3">Y Coord (0-400)</th>
+                                    <th class="py-2 px-3 text-right">Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody id="points-table-body" class="divide-y divide-slate-800/50 mono text-slate-300">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+
+                        <!-- Empty State -->
+                        <div id="empty-state" class="p-8 text-center flex flex-col items-center justify-center text-slate-500 h-44">
+                            <svg class="w-8 h-8 mb-2 opacity-30 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-xs font-medium text-slate-400">No points placed</p>
+                            <p class="text-[11px] text-slate-600 mt-1 max-w-[200px]">Click anywhere inside the 400×400 grid or paste coordinates.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Minimal Footer -->
+    <footer class="border-t border-slate-800/60 bg-slate-950 py-2.5 text-center text-[11px] text-slate-500">
+        400×400 Vector Grid Studio • Closed Loop Segment Insertion Engine
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        /**
+         * State & History Management
+         */
+        const LOGICAL_SIZE = 400; // Updated 400x400 extents
+
+        const state = {
+            points: [], // Array of {x, y, id}
+            snapToGrid: true,
+            gridStep: 10,
+            csvFormat: 'pairs', // 'pairs' | 'flat' | 'compact'
+            draggedPointIndex: null,
+            hoveredPointIndex: null,
+            hoveredSegmentIndex: null,
+            mousePos: { x: 0, y: 0 },
+            isMouseOverCanvas: false,
+            nextId: 1,
+            history: [],
+            historyIndex: -1
+        };
+
+        // Canvas Setup
+        const canvas = document.getElementById('gridCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function saveHistory() {
+            // Cut off forward history if undoing and then taking action
+            if (state.historyIndex < state.history.length - 1) {
+                state.history = state.history.slice(0, state.historyIndex + 1);
+            }
+            // Snapshot points
+            state.history.push(JSON.stringify(state.points));
+            if (state.history.length > 50) state.history.shift();
+            state.historyIndex = state.history.length - 1;
+            updateHistoryButtons();
+        }
+
+        function updateHistoryButtons() {
+            document.getElementById('btn-undo').disabled = state.historyIndex <= 0;
+            document.getElementById('btn-redo').disabled = state.historyIndex >= state.history.length - 1;
+        }
+
+        function undo() {
+            if (state.historyIndex > 0) {
+                state.historyIndex--;
+                state.points = JSON.parse(state.history[state.historyIndex]);
+                render();
+                updateUI();
+                updateHistoryButtons();
+                showToast('Undo performed', 'info');
+            }
+        }
+
+        function redo() {
+            if (state.historyIndex < state.history.length - 1) {
+                state.historyIndex++;
+                state.points = JSON.parse(state.history[state.historyIndex]);
+                render();
+                updateUI();
+                updateHistoryButtons();
+                showToast('Redo performed', 'info');
+            }
+        }
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            render();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+
+        /**
+         * Coordinates Math & Transformations
+         */
+        function clientToLogicalCoordinates(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            let x = ((clientX - rect.left) / rect.width) * LOGICAL_SIZE;
+            let y = ((clientY - rect.top) / rect.height) * LOGICAL_SIZE;
+
+            if (state.snapToGrid) {
+                x = Math.round(x / state.gridStep) * state.gridStep;
+                y = Math.round(y / state.gridStep) * state.gridStep;
+            }
+
+            x = Math.max(0, Math.min(LOGICAL_SIZE, x));
+            y = Math.max(0, Math.min(LOGICAL_SIZE, y));
+
+            return { x, y };
+        }
+
+        function logicalToCanvasPx(x, y) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / LOGICAL_SIZE;
+            const scaleY = canvas.height / LOGICAL_SIZE;
+            return {
+                x: x * scaleX,
+                y: y * scaleY
+            };
+        }
+
+        function dist2D(p1, p2) {
+            return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        }
+
+        /**
+         * Calculate distance from point P to line segment VW
+         */
+        function distToSegment(p, v, w) {
+            const l2 = (w.x - v.x) ** 2 + (w.y - v.y) ** 2;
+            if (l2 === 0) return dist2D(p, v);
+            let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+            t = Math.max(0, Math.min(1, t));
+            const proj = { x: v.x + t * (w.x - v.x), y: v.y + t * (w.y - v.y) };
+            return dist2D(p, proj);
+        }
+
+        function getNearestSegmentIndex(point, points) {
+            if (points.length < 2) return 0;
+            let minDistance = Infinity;
+            let nearestIndex = 0;
+
+            for (let i = 0; i < points.length; i++) {
+                const p1 = points[i];
+                const p2 = points[(i + 1) % points.length];
+                const dist = distToSegment(point, p1, p2);
+
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    nearestIndex = i;
+                }
+            }
+            return nearestIndex;
+        }
+
+        function findPointAtCoordinates(coords, threshold = 12) {
+            return state.points.findIndex(pt => dist2D(pt, coords) <= threshold);
+        }
+
+        function getBoundingBox() {
+            if (state.points.length === 0) return { minX: 0, maxX: 0, minY: 0, maxY: 0, width: 0, height: 0 };
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            state.points.forEach(p => {
+                if (p.x < minX) minX = p.x;
+                if (p.x > maxX) maxX = p.x;
+                if (p.y < minY) minY = p.y;
+                if (p.y > maxY) maxY = p.y;
+            });
+            return {
+                minX, maxX, minY, maxY,
+                width: Math.round(maxX - minX),
+                height: Math.round(maxY - minY)
+            };
+        }
+
+        function calculatePerimeter() {
+            if (state.points.length < 2) return 0;
+            let total = 0;
+            for (let i = 0; i < state.points.length; i++) {
+                const p1 = state.points[i];
+                const p2 = state.points[(i + 1) % state.points.length];
+                total += dist2D(p1, p2);
+            }
+            return total;
+        }
+
+        function calculateShoelaceArea() {
+            if (state.points.length < 3) return 0;
+            let area = 0;
+            for (let i = 0; i < state.points.length; i++) {
+                const j = (i + 1) % state.points.length;
+                area += state.points[i].x * state.points[j].y;
+                area -= state.points[j].x * state.points[i].y;
+            }
+            return Math.abs(area) / 2;
+        }
+
+        /**
+         * Flexible Parser for Comma-Separated & Various Text Formats
+         */
+        function parsePointsFromText(rawText) {
+            if (!rawText || !rawText.trim()) return [];
+            // Regex to find all numbers (including floats and integers)
+            const matches = rawText.match(/-?\d+(?:\.\d+)?/g);
+            if (!matches || matches.length < 2) return [];
+
+            const numbers = matches.map(Number);
+            const parsed = [];
+            for (let i = 0; i < numbers.length - 1; i += 2) {
+                let x = numbers[i];
+                let y = numbers[i+1];
+                // Clamp to 0..400
+                x = Math.max(0, Math.min(LOGICAL_SIZE, Math.round(x)));
+                y = Math.max(0, Math.min(LOGICAL_SIZE, Math.round(y)));
+                parsed.push({ x, y, id: state.nextId++ });
+            }
+            return parsed;
+        }
+
+        function updateParserStatus() {
+            const rawText = document.getElementById('csv-input-output').value;
+            const parsed = parsePointsFromText(rawText);
+            const statusEl = document.getElementById('parser-status');
+
+            if (!rawText.trim()) {
+                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-600"></span><span>Waiting for text input...</span>`;
+            } else if (parsed.length > 0) {
+                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span class="text-emerald-400 font-semibold">Recognized ${parsed.length} valid point${parsed.length > 1 ? 's' : ''}</span>`;
+            } else {
+                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-400"></span><span class="text-rose-400">No valid coordinate pairs detected</span>`;
+            }
+        }
+
+        function generateCSVString() {
+            if (state.points.length === 0) return '';
+            switch (state.csvFormat) {
+                case 'flat':
+                    return state.points.flatMap(p => [p.x, p.y]).join(', ');
+                case 'compact':
+                    return state.points.flatMap(p => [p.x, p.y]).join(',');
+                case 'pairs':
+                default:
+                    return state.points.map(p => `(${p.x}, ${p.y})`).join(', ');
+            }
+        }
+
+        /**
+         * Canvas Rendering Pipeline (400x400)
+         */
+        function render() {
+            const width = canvas.width;
+            const height = canvas.height;
+            const scale = width / LOGICAL_SIZE;
+
+            // Clear Canvas
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#070a12';
+            ctx.fillRect(0, 0, width, height);
+
+            // 1. Grid Lines (Minor every 10px, Major every 50px/100px)
+            const minorStep = 10;
+            ctx.lineWidth = 0.5 * (window.devicePixelRatio || 1);
+            ctx.strokeStyle = 'rgba(30, 41, 59, 0.5)';
+
+            for (let x = 0; x <= LOGICAL_SIZE; x += minorStep) {
+                if (x % 50 === 0) continue;
+                ctx.beginPath();
+                ctx.moveTo(x * scale, 0);
+                ctx.lineTo(x * scale, height);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= LOGICAL_SIZE; y += minorStep) {
+                if (y % 50 === 0) continue;
+                ctx.beginPath();
+                ctx.moveTo(0, y * scale);
+                ctx.lineTo(width, y * scale);
+                ctx.stroke();
+            }
+
+            // Major Grid Lines (every 50px, labeled at 0, 100, 200, 300, 400)
+            ctx.lineWidth = 1 * (window.devicePixelRatio || 1);
+            ctx.strokeStyle = 'rgba(51, 65, 85, 0.8)';
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.45)';
+            ctx.font = `${Math.max(9, 9.5 * scale / 1.1)}px JetBrains Mono`;
+
+            for (let x = 0; x <= LOGICAL_SIZE; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x * scale, 0);
+                ctx.lineTo(x * scale, height);
+                ctx.stroke();
+                if (x % 100 === 0 && x > 0 && x < LOGICAL_SIZE) {
+                    ctx.fillText(x.toString(), x * scale + 3, 12 * (scale / 1.1));
+                }
+            }
+            for (let y = 0; y <= LOGICAL_SIZE; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y * scale);
+                ctx.lineTo(width, y * scale);
+                ctx.stroke();
+                if (y % 100 === 0 && y > 0 && y < LOGICAL_SIZE) {
+                    ctx.fillText(y.toString(), 3, y * scale - 3);
+                }
+            }
+
+            // 2. Closed Loop Polygon Fill (>= 3 points)
+            if (state.points.length >= 3) {
+                ctx.beginPath();
+                const first = logicalToCanvasPx(state.points[0].x, state.points[0].y);
+                ctx.moveTo(first.x, first.y);
+                for (let i = 1; i < state.points.length; i++) {
+                    const pt = logicalToCanvasPx(state.points[i].x, state.points[i].y);
+                    ctx.lineTo(pt.x, pt.y);
+                }
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(0, 243, 255, 0.08)';
+                ctx.fill();
+            }
+
+            // 3. Render Polygon Closed Edges
+            if (state.points.length >= 2) {
+                for (let i = 0; i < state.points.length; i++) {
+                    const nextIdx = (i + 1) % state.points.length;
+                    const p1 = logicalToCanvasPx(state.points[i].x, state.points[i].y);
+                    const p2 = logicalToCanvasPx(state.points[nextIdx].x, state.points[nextIdx].y);
+
+                    const isNearestSegment = (state.isMouseOverCanvas && 
+                                              state.draggedPointIndex === null && 
+                                              state.hoveredPointIndex === null && 
+                                              state.points.length >= 3 &&
+                                              state.hoveredSegmentIndex === i);
+
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+
+                    if (isNearestSegment) {
+                        ctx.lineWidth = 3.5 * (window.devicePixelRatio || 1);
+                        ctx.strokeStyle = '#f59e0b'; // Amber highlight
+                        ctx.shadowColor = '#f59e0b';
+                        ctx.shadowBlur = 10 * (window.devicePixelRatio || 1);
+                    } else {
+                        ctx.lineWidth = 2 * (window.devicePixelRatio || 1);
+                        ctx.strokeStyle = '#00f3ff';
+                        ctx.shadowColor = '#00f3ff';
+                        ctx.shadowBlur = 4 * (window.devicePixelRatio || 1);
+                    }
+
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+                }
+            } else if (state.points.length === 1 && state.isMouseOverCanvas && state.draggedPointIndex === null) {
+                // Line preview when only 1 point exists
+                const p0 = logicalToCanvasPx(state.points[0].x, state.points[0].y);
+                const mousePx = logicalToCanvasPx(state.mousePos.x, state.mousePos.y);
+
+                ctx.beginPath();
+                ctx.moveTo(p0.x, p0.y);
+                ctx.lineTo(mousePx.x, mousePx.y);
+                ctx.lineWidth = 2 * (window.devicePixelRatio || 1);
+                ctx.strokeStyle = '#00f3ff';
+                ctx.setLineDash([4, 4]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // 4. Hover Preview for Segment Insertion
+            if (state.isMouseOverCanvas && 
+                state.draggedPointIndex === null && 
+                state.hoveredPointIndex === null && 
+                state.points.length >= 3) {
+
+                const segIdx = state.hoveredSegmentIndex;
+                if (segIdx !== null && segIdx < state.points.length) {
+                    const p1 = logicalToCanvasPx(state.points[segIdx].x, state.points[segIdx].y);
+                    const p2 = logicalToCanvasPx(state.points[(segIdx + 1) % state.points.length].x, state.points[(segIdx + 1) % state.points.length].y);
+                    const mousePx = logicalToCanvasPx(state.mousePos.x, state.mousePos.y);
+
+                    ctx.lineWidth = 1.8 * (window.devicePixelRatio || 1);
+                    ctx.strokeStyle = '#f59e0b';
+                    ctx.setLineDash([4, 4]);
+
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(mousePx.x, mousePx.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // Ghost Node Preview
+                    ctx.beginPath();
+                    ctx.arc(mousePx.x, mousePx.y, 6 * (scale / 1.1), 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(245, 158, 11, 0.4)';
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.arc(mousePx.x, mousePx.y, 3.5 * (scale / 1.1), 0, Math.PI * 2);
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.fill();
+                }
+            }
+
+            // 5. Render Points Vertices
+            state.points.forEach((pt, index) => {
+                const canvasPt = logicalToCanvasPx(pt.x, pt.y);
+                const isHovered = state.hoveredPointIndex === index;
+                const isDragged = state.draggedPointIndex === index;
+
+                // Outer Glow Ring
+                ctx.beginPath();
+                ctx.arc(canvasPt.x, canvasPt.y, (isHovered || isDragged ? 8.5 : 5.5) * (scale / 1.1), 0, Math.PI * 2);
+                ctx.fillStyle = isHovered || isDragged ? 'rgba(192, 132, 252, 0.45)' : 'rgba(0, 243, 255, 0.25)';
+                ctx.fill();
+
+                // Inner Circle Node
+                ctx.beginPath();
+                ctx.arc(canvasPt.x, canvasPt.y, (isHovered || isDragged ? 4.5 : 3.5) * (scale / 1.1), 0, Math.PI * 2);
+                ctx.fillStyle = isHovered || isDragged ? '#c084fc' : '#00f3ff';
+                ctx.fill();
+                ctx.lineWidth = 1.5 * (window.devicePixelRatio || 1);
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+
+                // Point Index Label
+                const label = `P${index}`;
+                ctx.font = `bold ${Math.max(9, 9.5 * scale / 1.1)}px JetBrains Mono`;
+                const lx = canvasPt.x + 7 * (scale / 1.1);
+                const ly = canvasPt.y - 7 * (scale / 1.1);
+
+                const textWidth = ctx.measureText(label).width;
+                ctx.fillStyle = 'rgba(7, 10, 18, 0.85)';
+                ctx.fillRect(lx - 2, ly - 9, textWidth + 4, 11);
+
+                ctx.fillStyle = isHovered || isDragged ? '#c084fc' : '#e2e8f0';
+                ctx.fillText(label, lx, ly);
+            });
+
+            // 6. Crosshair Guide
+            if (state.isMouseOverCanvas && state.hoveredPointIndex === null) {
+                const mousePx = logicalToCanvasPx(state.mousePos.x, state.mousePos.y);
+
+                ctx.lineWidth = 0.5 * (window.devicePixelRatio || 1);
+                ctx.strokeStyle = 'rgba(0, 243, 255, 0.3)';
+                ctx.setLineDash([3, 3]);
+
+                ctx.beginPath();
+                ctx.moveTo(0, mousePx.y);
+                ctx.lineTo(width, mousePx.y);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(mousePx.x, 0);
+                ctx.lineTo(mousePx.x, height);
+                ctx.stroke();
+
+                ctx.setLineDash([]);
+            }
+        }
+
+        /**
+         * Synchronize UI Elements
+         */
+        function updateUI() {
+            // Stats Bar
+            document.getElementById('stat-points-count').textContent = state.points.length;
+            document.getElementById('badge-count').textContent = state.points.length;
+
+            const perimeter = calculatePerimeter();
+            document.getElementById('stat-perimeter').innerHTML = `${perimeter.toFixed(1)} <span class="text-[10px] text-slate-500 font-normal">px</span>`;
+
+            const area = calculateShoelaceArea();
+            document.getElementById('stat-area').innerHTML = `${area.toFixed(1)} <span class="text-[10px] text-slate-500 font-normal">px²</span>`;
+
+            const bbox = getBoundingBox();
+            document.getElementById('stat-bbox').textContent = `${bbox.width}×${bbox.height}`;
+
+            // Sync Textarea Output
+            const csvArea = document.getElementById('csv-input-output');
+            csvArea.value = generateCSVString();
+            updateParserStatus();
+
+            // Table Render
+            const tbody = document.getElementById('points-table-body');
+            const emptyState = document.getElementById('empty-state');
+            tbody.innerHTML = '';
+
+            if (state.points.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+
+                state.points.forEach((pt, i) => {
+                    const tr = document.createElement('tr');
+                    const isHovered = state.hoveredPointIndex === i;
+                    tr.className = `hover:bg-slate-900 transition ${isHovered ? 'bg-cyan-950/40 text-cyan-300' : ''}`;
+
+                    tr.addEventListener('mouseenter', () => {
+                        state.hoveredPointIndex = i;
+                        render();
+                    });
+                    tr.addEventListener('mouseleave', () => {
+                        state.hoveredPointIndex = null;
+                        render();
+                    });
+
+                    tr.innerHTML = `
+                        <td class="py-2 px-3 font-bold text-cyan-400">P${i}</td>
+                        <td class="py-2 px-3">
+                            <input type="number" min="0" max="400" value="${pt.x}" data-idx="${i}" data-axis="x" class="coord-input w-20 bg-slate-900 border border-slate-700/80 focus:border-cyan-500 rounded px-1.5 py-0.5 text-xs text-slate-100 outline-none">
+                        </td>
+                        <td class="py-2 px-3">
+                            <input type="number" min="0" max="400" value="${pt.y}" data-idx="${i}" data-axis="y" class="coord-input w-20 bg-slate-900 border border-slate-700/80 focus:border-cyan-500 rounded px-1.5 py-0.5 text-xs text-slate-100 outline-none">
+                        </td>
+                        <td class="py-2 px-3 text-right">
+                            <button data-idx="${i}" class="btn-delete-row p-1 text-rose-400 hover:text-rose-200 bg-rose-950/30 hover:bg-rose-900/60 rounded border border-rose-900/40 transition" title="Delete P${i}">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // Attach Row Inputs
+                document.querySelectorAll('.coord-input').forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        saveHistory();
+                        const idx = parseInt(e.target.dataset.idx);
+                        const axis = e.target.dataset.axis;
+                        let val = parseInt(e.target.value) || 0;
+                        val = Math.max(0, Math.min(LOGICAL_SIZE, val));
+                        state.points[idx][axis] = val;
+                        render();
+                        updateUI();
+                    });
+                });
+
+                // Attach Row Delete Buttons
+                document.querySelectorAll('.btn-delete-row').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = parseInt(e.currentTarget.dataset.idx);
+                        deletePoint(idx);
+                    });
+                });
+            }
+        }
+
+        /**
+         * Point Operations & Click Handling
+         */
+        function deletePoint(index) {
+            if (index >= 0 && index < state.points.length) {
+                saveHistory();
+                const removed = state.points.splice(index, 1)[0];
+                showToast(`Deleted P${index} (${removed.x}, ${removed.y})`, 'info');
+                render();
+                updateUI();
+            }
+        }
+
+        function handlePointerDown(e) {
+            if (e.button === 2) return; // Right click deletes
+
+            const coords = clientToLogicalCoordinates(e.clientX, e.clientY);
+            const existingIdx = findPointAtCoordinates(coords);
+
+            saveHistory();
+
+            if (existingIdx !== -1) {
+                state.draggedPointIndex = existingIdx;
+            } else {
+                if (state.points.length < 3) {
+                    state.points.push({ x: coords.x, y: coords.y, id: state.nextId++ });
+                    state.draggedPointIndex = state.points.length - 1;
+                    showToast(`Added P${state.points.length - 1} at (${coords.x}, ${coords.y})`, 'success');
+                } else {
+                    const segIdx = getNearestSegmentIndex(coords, state.points);
+                    const insertPos = segIdx + 1;
+                    state.points.splice(insertPos, 0, { x: coords.x, y: coords.y, id: state.nextId++ });
+                    state.draggedPointIndex = insertPos;
+                    showToast(`Inserted P${insertPos} into segment P${segIdx}→P${(segIdx + 1) % (state.points.length - 1)}`, 'success');
+                }
+            }
+
+            render();
+            updateUI();
+        }
+
+        function handlePointerMove(e) {
+            const coords = clientToLogicalCoordinates(e.clientX, e.clientY);
+            state.mousePos = coords;
+            state.isMouseOverCanvas = true;
+
+            document.getElementById('hover-coord').textContent = `(${coords.x}, ${coords.y})`;
+
+            if (state.draggedPointIndex !== null) {
+                state.points[state.draggedPointIndex].x = coords.x;
+                state.points[state.draggedPointIndex].y = coords.y;
+                updateUI();
+            } else {
+                const hoverIdx = findPointAtCoordinates(coords);
+                state.hoveredPointIndex = hoverIdx !== -1 ? hoverIdx : null;
+
+                if (state.hoveredPointIndex === null && state.points.length >= 3) {
+                    state.hoveredSegmentIndex = getNearestSegmentIndex(coords, state.points);
+                } else {
+                    state.hoveredSegmentIndex = null;
+                }
+            }
+
+            render();
+        }
+
+        function handlePointerUp() {
+            if (state.draggedPointIndex !== null) {
+                state.draggedPointIndex = null;
+                render();
+            }
+        }
+
+        function handlePointerLeave() {
+            state.isMouseOverCanvas = false;
+            state.draggedPointIndex = null;
+            state.hoveredPointIndex = null;
+            state.hoveredSegmentIndex = null;
+            render();
+        }
+
+        function handleContextMenu(e) {
+            e.preventDefault();
+            const coords = clientToLogicalCoordinates(e.clientX, e.clientY);
+            const targetIdx = findPointAtCoordinates(coords);
+            if (targetIdx !== -1) {
+                deletePoint(targetIdx);
+            }
+        }
+
+        // Event Listeners
+        canvas.addEventListener('mousedown', handlePointerDown);
+        window.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('mouseup', handlePointerUp);
+        canvas.addEventListener('mouseleave', handlePointerLeave);
+        canvas.addEventListener('contextmenu', handleContextMenu);
+
+        // Touch Support
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) handlePointerDown(e.touches[0]);
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1) handlePointerMove(e.touches[0]);
+        }, { passive: true });
+
+        canvas.addEventListener('touchend', handlePointerUp);
+
+        /**
+         * Batch Transform Operations (Scale & Shift)
+         */
+        function transformPoints({ offsetX = 0, offsetY = 0, scaleX = 1, scaleY = 1, pivotType = 'centroid' }) {
+            if (state.points.length === 0) return;
+            saveHistory();
+
+            let pivot = { x: 0, y: 0 };
+            if (pivotType === 'centroid') {
+                const sumX = state.points.reduce((acc, p) => acc + p.x, 0);
+                const sumY = state.points.reduce((acc, p) => acc + p.y, 0);
+                pivot = { x: sumX / state.points.length, y: sumY / state.points.length };
+            } else if (pivotType === 'bounding') {
+                const bbox = getBoundingBox();
+                pivot = { x: (bbox.minX + bbox.maxX) / 2, y: (bbox.minY + bbox.maxY) / 2 };
+            } else if (pivotType === 'origin') {
+                pivot = { x: 0, y: 0 };
+            }
+
+            state.points = state.points.map(p => {
+                let nx = pivot.x + (p.x - pivot.x) * scaleX + offsetX;
+                let ny = pivot.y + (p.y - pivot.y) * scaleY + offsetY;
+
+                if (state.snapToGrid) {
+                    nx = Math.round(nx / state.gridStep) * state.gridStep;
+                    ny = Math.round(ny / state.gridStep) * state.gridStep;
+                }
+
+                return {
+                    ...p,
+                    x: Math.max(0, Math.min(LOGICAL_SIZE, Math.round(nx))),
+                    y: Math.max(0, Math.min(LOGICAL_SIZE, Math.round(ny)))
+                };
+            });
+
+            render();
+            updateUI();
+        }
+
+        function centerPolygon() {
+            if (state.points.length === 0) return;
+            const bbox = getBoundingBox();
+            const cx = (bbox.minX + bbox.maxX) / 2;
+            const cy = (bbox.minY + bbox.maxY) / 2;
+            const shiftX = Math.round(200 - cx);
+            const shiftY = Math.round(200 - cy);
+            transformPoints({ offsetX: shiftX, offsetY: shiftY, scaleX: 1, scaleY: 1, pivotType: 'origin' });
+            showToast(`Centered polygon in 400×400 grid`, 'success');
+        }
+
+        function fitToGrid() {
+            if (state.points.length < 2) {
+                showToast('Need at least 2 points to fit to grid', 'error');
+                return;
+            }
+            const bbox = getBoundingBox();
+            const w = bbox.maxX - bbox.minX;
+            const h = bbox.maxY - bbox.minY;
+            if (w === 0 && h === 0) return;
+
+            const padding = 20; // 20px padding around grid
+            const targetSize = LOGICAL_SIZE - padding * 2; // 360px
+            const scaleX = w > 0 ? targetSize / w : 1;
+            const scaleY = h > 0 ? targetSize / h : 1;
+            const scale = Math.min(scaleX, scaleY);
+
+            const cx = (bbox.minX + bbox.maxX) / 2;
+            const cy = (bbox.minY + bbox.maxY) / 2;
+
+            saveHistory();
+            state.points = state.points.map(p => {
+                let nx = 200 + (p.x - cx) * scale;
+                let ny = 200 + (p.y - cy) * scale;
+
+                if (state.snapToGrid) {
+                    nx = Math.round(nx / state.gridStep) * state.gridStep;
+                    ny = Math.round(ny / state.gridStep) * state.gridStep;
+                }
+
+                return {
+                    ...p,
+                    x: Math.max(0, Math.min(LOGICAL_SIZE, Math.round(nx))),
+                    y: Math.max(0, Math.min(LOGICAL_SIZE, Math.round(ny)))
+                };
+            });
+
+            render();
+            updateUI();
+            showToast(`Fitted polygon (Scaled ${(scale * 100).toFixed(0)}%)`, 'success');
+        }
+
+        /**
+         * Import & Clipboard Operations
+         */
+        function importPoints(mode = 'replace') {
+            const rawText = document.getElementById('csv-input-output').value;
+            const newPoints = parsePointsFromText(rawText);
+
+            if (newPoints.length === 0) {
+                showToast('No valid coordinates found in input text', 'error');
+                return;
+            }
+
+            saveHistory();
+
+            if (mode === 'replace') {
+                state.points = newPoints;
+                showToast(`Replaced grid with ${newPoints.length} points`, 'success');
+            } else {
+                state.points = [...state.points, ...newPoints];
+                showToast(`Appended ${newPoints.length} points to grid`, 'success');
+            }
+
+            render();
+            updateUI();
+        }
+
+        function copyCSVToClipboard() {
+            const text = generateCSVString();
+            if (!text) {
+                showToast('No coordinates to copy!', 'error');
+                return;
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(showCopySuccess).catch(() => fallbackCopy(text));
+            } else {
+                fallbackCopy(text);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showCopySuccess();
+            } catch (err) {
+                showToast('Copy failed. Please copy manually from the text box.', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showCopySuccess() {
+            const btnText = document.getElementById('txt-copy');
+            const originalText = btnText.textContent;
+            btnText.textContent = 'Copied!';
+            showToast('Coordinates copied to clipboard!', 'success');
+            setTimeout(() => { btnText.textContent = originalText; }, 2000);
+        }
+
+        /**
+         * UI Event Bindings
+         */
+        // Tabs Switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('tab-active', 'text-cyan-400');
+                    b.classList.add('text-slate-400');
+                });
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+
+                const target = e.currentTarget;
+                target.classList.add('tab-active', 'text-cyan-400');
+                target.classList.remove('text-slate-400');
+
+                if (target.id === 'tab-btn-paste') document.getElementById('tab-content-paste').classList.remove('hidden');
+                if (target.id === 'tab-btn-transform') document.getElementById('tab-content-transform').classList.remove('hidden');
+                if (target.id === 'tab-btn-table') document.getElementById('tab-content-table').classList.remove('hidden');
+            });
+        });
+
+        // Format presets
+        document.querySelectorAll('.fmt-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.fmt-btn').forEach(b => {
+                    b.classList.remove('text-cyan-400', 'bg-slate-800', 'border', 'border-slate-700');
+                    b.classList.add('text-slate-400');
+                });
+                const target = e.currentTarget;
+                target.classList.add('text-cyan-400', 'bg-slate-800', 'border', 'border-slate-700');
+                target.classList.remove('text-slate-400');
+
+                state.csvFormat = target.dataset.format;
+                updateUI();
+            });
+        });
+
+        // Textarea Live Input
+        document.getElementById('csv-input-output').addEventListener('input', updateParserStatus);
+
+        // Import & Export Buttons
+        document.getElementById('btn-import-replace').addEventListener('click', () => importPoints('replace'));
+        document.getElementById('btn-import-append').addEventListener('click', () => importPoints('append'));
+        document.getElementById('btn-copy-coords').addEventListener('click', copyCSVToClipboard);
+
+        // Offset & Nudge
+        document.getElementById('btn-apply-shift').addEventListener('click', () => {
+            const shiftX = parseInt(document.getElementById('input-shift-x').value) || 0;
+            const shiftY = parseInt(document.getElementById('input-shift-y').value) || 0;
+            transformPoints({ offsetX: shiftX, offsetY: shiftY, scaleX: 1, scaleY: 1, pivotType: 'origin' });
+            showToast(`Shifted points by (X: ${shiftX}, Y: ${shiftY})`, 'info');
+        });
+
+        document.querySelectorAll('.btn-nudge').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const dir = e.currentTarget.dataset.dir;
+                const step = parseInt(document.getElementById('select-nudge-step').value) || 5;
+                let dx = 0, dy = 0;
+                if (dir === 'up') dy = -step;
+                if (dir === 'down') dy = step;
+                if (dir === 'left') dx = -step;
+                if (dir === 'right') dx = step;
+                transformPoints({ offsetX: dx, offsetY: dy, scaleX: 1, scaleY: 1, pivotType: 'origin' });
+            });
+        });
+
+        // Center / Fit Buttons
+        document.getElementById('btn-center-poly').addEventListener('click', centerPolygon);
+        document.getElementById('btn-quick-center').addEventListener('click', centerPolygon);
+        document.getElementById('btn-fit-grid').addEventListener('click', fitToGrid);
+        document.getElementById('btn-quick-fit').addEventListener('click', fitToGrid);
+
+        // Scale Controls
+        const sliderScale = document.getElementById('slider-scale');
+        const inputScaleX = document.getElementById('input-scale-x');
+        const inputScaleY = document.getElementById('input-scale-y');
+        const lblScaleVal = document.getElementById('lbl-scale-val');
+
+        sliderScale.addEventListener('input', (e) => {
+            const val = e.target.value;
+            inputScaleX.value = val;
+            inputScaleY.value = val;
+            lblScaleVal.textContent = `${val}% (${(val/100).toFixed(1)}x)`;
+        });
+
+        document.getElementById('btn-apply-scale').addEventListener('click', () => {
+            const sx = (parseFloat(inputScaleX.value) || 100) / 100;
+            const sy = (parseFloat(inputScaleY.value) || 100) / 100;
+            const pivot = document.getElementById('select-pivot').value;
+            transformPoints({ offsetX: 0, offsetY: 0, scaleX: sx, scaleY: sy, pivotType: pivot });
+            showToast(`Scaled polygon by X:${(sx*100).toFixed(0)}%, Y:${(sy*100).toFixed(0)}%`, 'info');
+        });
+
+        // Top Toolbar Controls
+        document.getElementById('chk-snap-grid').addEventListener('change', (e) => {
+            state.snapToGrid = e.target.checked;
+            showToast(`Snap to grid ${state.snapToGrid ? 'enabled' : 'disabled'}`, 'info');
+        });
+
+        document.getElementById('select-grid-step').addEventListener('change', (e) => {
+            state.gridStep = parseInt(e.target.value);
+            showToast(`Snap step set to ${state.gridStep}px`, 'info');
+        });
+
+        document.getElementById('btn-undo').addEventListener('click', undo);
+        document.getElementById('btn-redo').addEventListener('click', redo);
+
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            if (state.points.length > 0) {
+                saveHistory();
+                state.points = [];
+                render();
+                updateUI();
+                showToast('Cleared all points', 'info');
+            }
+        });
+
+        // Shortcuts
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                e.preventDefault();
+                undo();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+                e.preventDefault();
+                redo();
+            }
+        });
+
+        /**
+         * Toast System
+         */
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            const colorClass = type === 'success' ? 'bg-emerald-950/90 border-emerald-800 text-emerald-200' :
+                               type === 'error' ? 'bg-rose-950/90 border-rose-800 text-rose-200' :
+                               'bg-slate-900/90 border-cyan-800/80 text-cyan-200';
+
+            toast.className = `pointer-events-auto px-3.5 py-2 rounded-xl border shadow-2xl text-xs font-medium transition-all duration-300 transform translate-x-4 opacity-0 flex items-center gap-2 ${colorClass}`;
+            toast.innerHTML = `
+                <span class="w-1.5 h-1.5 rounded-full ${type === 'success' ? 'bg-emerald-400' : type === 'error' ? 'bg-rose-400' : 'bg-cyan-400'}"></span>
+                ${message}
+            `;
+
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-x-4', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('translate-x-4', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 2200);
+        }
+
+        /**
+         * App Initialization
+         */
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            saveHistory();
+            updateUI();
+        });
+    </script>
+</body>
+</html>
