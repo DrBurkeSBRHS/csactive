@@ -82,7 +82,7 @@
                     <h1 class="text-sm font-semibold text-white tracking-wide flex items-center gap-2">
                         Vector Grid <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-cyan-400 border border-slate-800 mono">400×400</span>
                     </h1>
-                    <p class="text-[10px] text-slate-400 hidden sm:block">Closed Loop Vector Canvas • Scale, Shift & Edit Studio</p>
+                    <p class="text-[10px] text-slate-400 hidden sm:block">Interactive Vector Canvas • Sequential & Nearest Line Modes</p>
                 </div>
             </div>
 
@@ -103,13 +103,13 @@
                 <div class="h-4 w-px bg-slate-800 shrink-0"></div>
 
                 <!-- Quick Center Button -->
-                <button id="btn-quick-center" title="Center polygon in 400x400 grid" class="px-2.5 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-lg border border-slate-800 transition flex items-center gap-1.5 active:scale-95 shrink-0">
+                <button id="btn-quick-center" title="Center shape in 400x400 grid" class="px-2.5 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-lg border border-slate-800 transition flex items-center gap-1.5 active:scale-95 shrink-0">
                     <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Center
                 </button>
 
                 <!-- Quick Fit Button -->
-                <button id="btn-quick-fit" title="Fit polygon inside 400x400 grid with margin" class="px-2.5 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-lg border border-slate-800 transition flex items-center gap-1.5 active:scale-95 shrink-0">
+                <button id="btn-quick-fit" title="Fit shape inside 400x400 grid with margin" class="px-2.5 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-slate-200 rounded-lg border border-slate-800 transition flex items-center gap-1.5 active:scale-95 shrink-0">
                     <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
                     Fit
                 </button>
@@ -144,11 +144,42 @@
             
             <div class="w-full bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-2xl backdrop-blur flex flex-col items-center">
                 
+                <!-- Canvas Control Bar: Click Mode & Figure Type -->
+                <div class="w-full flex flex-wrap items-center justify-between gap-2 mb-3 bg-slate-950 p-2 rounded-xl border border-slate-800/90">
+                    
+                    <!-- Click Mode Selector -->
+                    <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800/80">
+                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-1 hidden sm:inline">Mode:</span>
+                        <button id="btn-mode-sequential" title="Clicking appends a new point connected to the previously dropped point" class="px-2.5 py-1 text-xs font-semibold rounded-md transition flex items-center gap-1 bg-cyan-500 text-slate-950 shadow-md">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                            Sequential
+                        </button>
+                        <button id="btn-mode-nearest" title="Clicking inserts a point into the nearest line segment" class="px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-200 rounded-md transition flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                            Nearest Line
+                        </button>
+                    </div>
+
+                    <!-- Figure Closure Selector -->
+                    <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800/80">
+                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-1 hidden sm:inline">Figure:</span>
+                        <button id="btn-fig-closed" title="Connect last point back to first point (Closed Loop)" class="px-2.5 py-1 text-xs font-semibold rounded-md transition flex items-center gap-1 bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4h16v16H4z"></path></svg>
+                            Closed
+                        </button>
+                        <button id="btn-fig-open" title="Points connected in sequence without closing loop (Open Polyline)" class="px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-200 border border-transparent rounded-md transition flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 12h16"></path></svg>
+                            Open
+                        </button>
+                    </div>
+
+                </div>
+
                 <!-- Viewport Header Info -->
                 <div class="w-full flex items-center justify-between mb-3 text-xs">
                     <div class="flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-                        <span class="font-semibold text-slate-300 uppercase tracking-wider text-[11px]">400×400 Grid</span>
+                        <span class="font-semibold text-slate-300 uppercase tracking-wider text-[11px]">400×400 Canvas</span>
                     </div>
                     <div class="flex items-center gap-2 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-800/80">
                         <span class="text-slate-500 font-medium text-[10px]">MOUSE:</span>
@@ -170,15 +201,15 @@
                 <!-- Usage Hint Footer -->
                 <div class="w-full mt-3 text-[11px] text-slate-400 space-y-1 bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/60">
                     <div class="flex items-center justify-between">
-                        <span class="text-slate-300 font-medium flex items-center gap-1.5">
+                        <span id="hint-title" class="text-slate-300 font-medium flex items-center gap-1.5">
                             <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Nearest Line Segment Insertion
+                            Sequential Append Mode
                         </span>
                         <span class="text-slate-500 text-[10px]">Right-click to delete point</span>
                     </div>
-                    <div class="text-[10px] text-slate-500 pl-5">
-                        • Click anywhere on grid to insert points into nearest closed loop segment.
-                        <br>• Drag points to adjust coordinates. Edit or paste text on the right.
+                    <div id="hint-body" class="text-[10px] text-slate-500 pl-5 leading-relaxed">
+                        • Click to drop a new point connected to the previously dropped point.
+                        <br>• Drag points to move. Edit raw text or coordinates table on the right.
                     </div>
                 </div>
 
@@ -308,7 +339,7 @@
                                 Offset / Shift
                             </h2>
                             <button id="btn-center-poly" class="text-[10px] font-medium text-cyan-400 hover:text-cyan-300 bg-cyan-950/40 hover:bg-cyan-900/60 px-2 py-0.5 rounded border border-cyan-800/50 transition">
-                                Center Polygon
+                                Center Shape
                             </button>
                         </div>
 
@@ -429,7 +460,7 @@
                             Interactive Points Sequence
                             <span id="badge-count" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-800 text-slate-300 mono">0</span>
                         </h2>
-                        <span class="text-[10px] text-slate-500 mono">P<sub>0</sub> → ... → P<sub>n-1</sub> → P<sub>0</sub></span>
+                        <span id="table-seq-indicator" class="text-[10px] text-slate-500 mono">P<sub>0</sub> → ... → P<sub>n-1</sub> → P<sub>0</sub></span>
                     </div>
 
                     <!-- Scrollable Table -->
@@ -468,7 +499,7 @@
 
     <!-- Minimal Footer -->
     <footer class="border-t border-slate-800/60 bg-slate-950 py-2.5 text-center text-[11px] text-slate-500">
-        400×400 Vector Grid Studio • Closed Loop Segment Insertion Engine
+        400×400 Vector Grid Studio • Dual Editing Modes & Open/Closed Geometry Engine
     </footer>
 
     <!-- Application Script -->
@@ -476,12 +507,14 @@
         /**
          * State & History Management
          */
-        const LOGICAL_SIZE = 400; // Updated 400x400 extents
+        const LOGICAL_SIZE = 400; // 400x400 extents
 
         const state = {
             points: [], // Array of {x, y, id}
             snapToGrid: true,
             gridStep: 10,
+            clickMode: 'sequential', // 'sequential' (default) | 'nearest'
+            isClosed: true, // true (default closed loop) | false (open polyline)
             csvFormat: 'pairs', // 'pairs' | 'flat' | 'compact'
             draggedPointIndex: null,
             hoveredPointIndex: null,
@@ -502,8 +535,12 @@
             if (state.historyIndex < state.history.length - 1) {
                 state.history = state.history.slice(0, state.historyIndex + 1);
             }
-            // Snapshot points
-            state.history.push(JSON.stringify(state.points));
+            // Snapshot points & figure mode
+            const snapshot = {
+                points: state.points,
+                isClosed: state.isClosed
+            };
+            state.history.push(JSON.stringify(snapshot));
             if (state.history.length > 50) state.history.shift();
             state.historyIndex = state.history.length - 1;
             updateHistoryButtons();
@@ -517,7 +554,13 @@
         function undo() {
             if (state.historyIndex > 0) {
                 state.historyIndex--;
-                state.points = JSON.parse(state.history[state.historyIndex]);
+                const snapshot = JSON.parse(state.history[state.historyIndex]);
+                if (Array.isArray(snapshot)) {
+                    state.points = snapshot;
+                } else {
+                    state.points = snapshot.points || [];
+                    state.isClosed = snapshot.isClosed !== undefined ? snapshot.isClosed : true;
+                }
                 render();
                 updateUI();
                 updateHistoryButtons();
@@ -528,7 +571,13 @@
         function redo() {
             if (state.historyIndex < state.history.length - 1) {
                 state.historyIndex++;
-                state.points = JSON.parse(state.history[state.historyIndex]);
+                const snapshot = JSON.parse(state.history[state.historyIndex]);
+                if (Array.isArray(snapshot)) {
+                    state.points = snapshot;
+                } else {
+                    state.points = snapshot.points || [];
+                    state.isClosed = snapshot.isClosed !== undefined ? snapshot.isClosed : true;
+                }
                 render();
                 updateUI();
                 updateHistoryButtons();
@@ -566,7 +615,6 @@
         }
 
         function logicalToCanvasPx(x, y) {
-            const rect = canvas.getBoundingClientRect();
             const scaleX = canvas.width / LOGICAL_SIZE;
             const scaleY = canvas.height / LOGICAL_SIZE;
             return {
@@ -591,12 +639,13 @@
             return dist2D(p, proj);
         }
 
-        function getNearestSegmentIndex(point, points) {
-            if (points.length < 2) return 0;
+        function getNearestSegmentIndex(point, points, isClosed) {
+            const numSegments = isClosed ? points.length : points.length - 1;
+            if (numSegments < 1) return 0;
             let minDistance = Infinity;
             let nearestIndex = 0;
 
-            for (let i = 0; i < points.length; i++) {
+            for (let i = 0; i < numSegments; i++) {
                 const p1 = points[i];
                 const p2 = points[(i + 1) % points.length];
                 const dist = distToSegment(point, p1, p2);
@@ -632,7 +681,8 @@
         function calculatePerimeter() {
             if (state.points.length < 2) return 0;
             let total = 0;
-            for (let i = 0; i < state.points.length; i++) {
+            const count = state.isClosed ? state.points.length : state.points.length - 1;
+            for (let i = 0; i < count; i++) {
                 const p1 = state.points[i];
                 const p2 = state.points[(i + 1) % state.points.length];
                 total += dist2D(p1, p2);
@@ -641,7 +691,7 @@
         }
 
         function calculateShoelaceArea() {
-            if (state.points.length < 3) return 0;
+            if (!state.isClosed || state.points.length < 3) return null;
             let area = 0;
             for (let i = 0; i < state.points.length; i++) {
                 const j = (i + 1) % state.points.length;
@@ -652,11 +702,10 @@
         }
 
         /**
-         * Flexible Parser for Comma-Separated & Various Text Formats
+         * Parser for Comma-Separated & Text Formats
          */
         function parsePointsFromText(rawText) {
             if (!rawText || !rawText.trim()) return [];
-            // Regex to find all numbers (including floats and integers)
             const matches = rawText.match(/-?\d+(?:\.\d+)?/g);
             if (!matches || matches.length < 2) return [];
 
@@ -665,7 +714,6 @@
             for (let i = 0; i < numbers.length - 1; i += 2) {
                 let x = numbers[i];
                 let y = numbers[i+1];
-                // Clamp to 0..400
                 x = Math.max(0, Math.min(LOGICAL_SIZE, Math.round(x)));
                 y = Math.max(0, Math.min(LOGICAL_SIZE, Math.round(y)));
                 parsed.push({ x, y, id: state.nextId++ });
@@ -707,6 +755,7 @@
             const width = canvas.width;
             const height = canvas.height;
             const scale = width / LOGICAL_SIZE;
+            const dpr = window.devicePixelRatio || 1;
 
             // Clear Canvas
             ctx.clearRect(0, 0, width, height);
@@ -715,7 +764,7 @@
 
             // 1. Grid Lines (Minor every 10px, Major every 50px/100px)
             const minorStep = 10;
-            ctx.lineWidth = 0.5 * (window.devicePixelRatio || 1);
+            ctx.lineWidth = 0.5 * dpr;
             ctx.strokeStyle = 'rgba(30, 41, 59, 0.5)';
 
             for (let x = 0; x <= LOGICAL_SIZE; x += minorStep) {
@@ -734,7 +783,7 @@
             }
 
             // Major Grid Lines (every 50px, labeled at 0, 100, 200, 300, 400)
-            ctx.lineWidth = 1 * (window.devicePixelRatio || 1);
+            ctx.lineWidth = 1 * dpr;
             ctx.strokeStyle = 'rgba(51, 65, 85, 0.8)';
             ctx.fillStyle = 'rgba(148, 163, 184, 0.45)';
             ctx.font = `${Math.max(9, 9.5 * scale / 1.1)}px JetBrains Mono`;
@@ -758,12 +807,15 @@
                 }
             }
 
-            // 2. Closed Loop Polygon Fill (>= 3 points)
-            if (state.points.length >= 3) {
+            const numPoints = state.points.length;
+            const numEdges = state.isClosed ? numPoints : Math.max(0, numPoints - 1);
+
+            // 2. Closed Loop Polygon Fill (if Closed Figure and >= 3 points)
+            if (state.isClosed && numPoints >= 3) {
                 ctx.beginPath();
                 const first = logicalToCanvasPx(state.points[0].x, state.points[0].y);
                 ctx.moveTo(first.x, first.y);
-                for (let i = 1; i < state.points.length; i++) {
+                for (let i = 1; i < numPoints; i++) {
                     const pt = logicalToCanvasPx(state.points[i].x, state.points[i].y);
                     ctx.lineTo(pt.x, pt.y);
                 }
@@ -772,90 +824,124 @@
                 ctx.fill();
             }
 
-            // 3. Render Polygon Closed Edges
-            if (state.points.length >= 2) {
-                for (let i = 0; i < state.points.length; i++) {
-                    const nextIdx = (i + 1) % state.points.length;
+            // 3. Render Polygon / Polyline Edges
+            if (numEdges > 0) {
+                for (let i = 0; i < numEdges; i++) {
+                    const nextIdx = (i + 1) % numPoints;
                     const p1 = logicalToCanvasPx(state.points[i].x, state.points[i].y);
                     const p2 = logicalToCanvasPx(state.points[nextIdx].x, state.points[nextIdx].y);
 
-                    const isNearestSegment = (state.isMouseOverCanvas && 
-                                              state.draggedPointIndex === null && 
-                                              state.hoveredPointIndex === null && 
-                                              state.points.length >= 3 &&
-                                              state.hoveredSegmentIndex === i);
+                    const isNearestHighlighted = (
+                        state.clickMode === 'nearest' &&
+                        state.isMouseOverCanvas && 
+                        state.draggedPointIndex === null && 
+                        state.hoveredPointIndex === null && 
+                        state.hoveredSegmentIndex === i
+                    );
 
                     ctx.beginPath();
                     ctx.moveTo(p1.x, p1.y);
                     ctx.lineTo(p2.x, p2.y);
 
-                    if (isNearestSegment) {
-                        ctx.lineWidth = 3.5 * (window.devicePixelRatio || 1);
-                        ctx.strokeStyle = '#f59e0b'; // Amber highlight
+                    if (isNearestHighlighted) {
+                        ctx.lineWidth = 3.5 * dpr;
+                        ctx.strokeStyle = '#f59e0b'; // Amber highlight for nearest line
                         ctx.shadowColor = '#f59e0b';
-                        ctx.shadowBlur = 10 * (window.devicePixelRatio || 1);
+                        ctx.shadowBlur = 10 * dpr;
                     } else {
-                        ctx.lineWidth = 2 * (window.devicePixelRatio || 1);
+                        ctx.lineWidth = 2 * dpr;
                         ctx.strokeStyle = '#00f3ff';
                         ctx.shadowColor = '#00f3ff';
-                        ctx.shadowBlur = 4 * (window.devicePixelRatio || 1);
+                        ctx.shadowBlur = 4 * dpr;
                     }
 
                     ctx.stroke();
                     ctx.shadowBlur = 0;
                 }
-            } else if (state.points.length === 1 && state.isMouseOverCanvas && state.draggedPointIndex === null) {
-                // Line preview when only 1 point exists
-                const p0 = logicalToCanvasPx(state.points[0].x, state.points[0].y);
-                const mousePx = logicalToCanvasPx(state.mousePos.x, state.mousePos.y);
-
-                ctx.beginPath();
-                ctx.moveTo(p0.x, p0.y);
-                ctx.lineTo(mousePx.x, mousePx.y);
-                ctx.lineWidth = 2 * (window.devicePixelRatio || 1);
-                ctx.strokeStyle = '#00f3ff';
-                ctx.setLineDash([4, 4]);
-                ctx.stroke();
-                ctx.setLineDash([]);
             }
 
-            // 4. Hover Preview for Segment Insertion
-            if (state.isMouseOverCanvas && 
-                state.draggedPointIndex === null && 
-                state.hoveredPointIndex === null && 
-                state.points.length >= 3) {
+            // 4. Hover Previews (Sequential vs Nearest Mode)
+            if (state.isMouseOverCanvas && state.draggedPointIndex === null && state.hoveredPointIndex === null) {
+                const mousePx = logicalToCanvasPx(state.mousePos.x, state.mousePos.y);
 
-                const segIdx = state.hoveredSegmentIndex;
-                if (segIdx !== null && segIdx < state.points.length) {
-                    const p1 = logicalToCanvasPx(state.points[segIdx].x, state.points[segIdx].y);
-                    const p2 = logicalToCanvasPx(state.points[(segIdx + 1) % state.points.length].x, state.points[(segIdx + 1) % state.points.length].y);
-                    const mousePx = logicalToCanvasPx(state.mousePos.x, state.mousePos.y);
+                if (state.clickMode === 'nearest' && numEdges >= 1) {
+                    // Nearest Line Mode Hover Preview
+                    const segIdx = state.hoveredSegmentIndex;
+                    if (segIdx !== null && segIdx < numEdges) {
+                        const p1 = logicalToCanvasPx(state.points[segIdx].x, state.points[segIdx].y);
+                        const p2 = logicalToCanvasPx(state.points[(segIdx + 1) % numPoints].x, state.points[(segIdx + 1) % numPoints].y);
 
-                    ctx.lineWidth = 1.8 * (window.devicePixelRatio || 1);
-                    ctx.strokeStyle = '#f59e0b';
-                    ctx.setLineDash([4, 4]);
+                        ctx.lineWidth = 1.8 * dpr;
+                        ctx.strokeStyle = '#f59e0b';
+                        ctx.setLineDash([4, 4]);
 
-                    ctx.beginPath();
-                    ctx.moveTo(p1.x, p1.y);
-                    ctx.lineTo(mousePx.x, mousePx.y);
-                    ctx.lineTo(p2.x, p2.y);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(mousePx.x, mousePx.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
 
-                    // Ghost Node Preview
-                    ctx.beginPath();
-                    ctx.arc(mousePx.x, mousePx.y, 6 * (scale / 1.1), 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(245, 158, 11, 0.4)';
-                    ctx.fill();
+                        // Ghost Node Preview
+                        ctx.beginPath();
+                        ctx.arc(mousePx.x, mousePx.y, 6 * (scale / 1.1), 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(245, 158, 11, 0.4)';
+                        ctx.fill();
 
-                    ctx.beginPath();
-                    ctx.arc(mousePx.x, mousePx.y, 3.5 * (scale / 1.1), 0, Math.PI * 2);
-                    ctx.fillStyle = '#f59e0b';
-                    ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(mousePx.x, mousePx.y, 3.5 * (scale / 1.1), 0, Math.PI * 2);
+                        ctx.fillStyle = '#f59e0b';
+                        ctx.fill();
+                    }
+                } else {
+                    // Sequential Mode Hover Preview (or Nearest Mode with < 2 points)
+                    if (numPoints >= 1) {
+                        const pLast = logicalToCanvasPx(state.points[numPoints - 1].x, state.points[numPoints - 1].y);
+
+                        ctx.lineWidth = 1.8 * dpr;
+                        ctx.strokeStyle = '#00f3ff';
+                        ctx.setLineDash([4, 4]);
+
+                        // Line from last point to cursor
+                        ctx.beginPath();
+                        ctx.moveTo(pLast.x, pLast.y);
+                        ctx.lineTo(mousePx.x, mousePx.y);
+
+                        // If Closed Figure, connect cursor back to initial point P0
+                        if (state.isClosed) {
+                            const p0 = logicalToCanvasPx(state.points[0].x, state.points[0].y);
+                            ctx.lineTo(p0.x, p0.y);
+                        }
+
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+
+                        // Ghost Node Preview
+                        ctx.beginPath();
+                        ctx.arc(mousePx.x, mousePx.y, 6 * (scale / 1.1), 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(0, 243, 255, 0.4)';
+                        ctx.fill();
+
+                        ctx.beginPath();
+                        ctx.arc(mousePx.x, mousePx.y, 3.5 * (scale / 1.1), 0, Math.PI * 2);
+                        ctx.fillStyle = '#00f3ff';
+                        ctx.fill();
+                    } else {
+                        // Ghost Node Preview for first point
+                        ctx.beginPath();
+                        ctx.arc(mousePx.x, mousePx.y, 6 * (scale / 1.1), 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(0, 243, 255, 0.4)';
+                        ctx.fill();
+
+                        ctx.beginPath();
+                        ctx.arc(mousePx.x, mousePx.y, 3.5 * (scale / 1.1), 0, Math.PI * 2);
+                        ctx.fillStyle = '#00f3ff';
+                        ctx.fill();
+                    }
                 }
             }
 
-            // 5. Render Points Vertices
+            // 5. Render Vertices (Points)
             state.points.forEach((pt, index) => {
                 const canvasPt = logicalToCanvasPx(pt.x, pt.y);
                 const isHovered = state.hoveredPointIndex === index;
@@ -872,7 +958,7 @@
                 ctx.arc(canvasPt.x, canvasPt.y, (isHovered || isDragged ? 4.5 : 3.5) * (scale / 1.1), 0, Math.PI * 2);
                 ctx.fillStyle = isHovered || isDragged ? '#c084fc' : '#00f3ff';
                 ctx.fill();
-                ctx.lineWidth = 1.5 * (window.devicePixelRatio || 1);
+                ctx.lineWidth = 1.5 * dpr;
                 ctx.strokeStyle = '#ffffff';
                 ctx.stroke();
 
@@ -894,7 +980,7 @@
             if (state.isMouseOverCanvas && state.hoveredPointIndex === null) {
                 const mousePx = logicalToCanvasPx(state.mousePos.x, state.mousePos.y);
 
-                ctx.lineWidth = 0.5 * (window.devicePixelRatio || 1);
+                ctx.lineWidth = 0.5 * dpr;
                 ctx.strokeStyle = 'rgba(0, 243, 255, 0.3)';
                 ctx.setLineDash([3, 3]);
 
@@ -916,6 +1002,50 @@
          * Synchronize UI Elements
          */
         function updateUI() {
+            // Mode Controls Styling
+            const btnSeq = document.getElementById('btn-mode-sequential');
+            const btnNear = document.getElementById('btn-mode-nearest');
+
+            if (state.clickMode === 'sequential') {
+                btnSeq.className = 'px-2.5 py-1 text-xs font-semibold rounded-md transition flex items-center gap-1 bg-cyan-500 text-slate-950 shadow-md';
+                btnNear.className = 'px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-200 rounded-md transition flex items-center gap-1';
+            } else {
+                btnSeq.className = 'px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-200 rounded-md transition flex items-center gap-1';
+                btnNear.className = 'px-2.5 py-1 text-xs font-semibold rounded-md transition flex items-center gap-1 bg-amber-500 text-slate-950 shadow-md';
+            }
+
+            // Figure Closure Styling
+            const btnClosed = document.getElementById('btn-fig-closed');
+            const btnOpen = document.getElementById('btn-fig-open');
+
+            if (state.isClosed) {
+                btnClosed.className = 'px-2.5 py-1 text-xs font-semibold rounded-md transition flex items-center gap-1 bg-purple-500/20 text-purple-300 border border-purple-500/50';
+                btnOpen.className = 'px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-200 border border-transparent rounded-md transition flex items-center gap-1';
+            } else {
+                btnClosed.className = 'px-2.5 py-1 text-xs font-medium text-slate-400 hover:text-slate-200 border border-transparent rounded-md transition flex items-center gap-1';
+                btnOpen.className = 'px-2.5 py-1 text-xs font-semibold rounded-md transition flex items-center gap-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/50';
+            }
+
+            // Footer Usage Guidance Text
+            const hintTitle = document.getElementById('hint-title');
+            const hintBody = document.getElementById('hint-body');
+
+            if (state.clickMode === 'sequential') {
+                hintTitle.innerHTML = `<svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Sequential Mode Active`;
+                if (state.isClosed) {
+                    hintBody.innerHTML = `• Click to append points in sequence. The newest point connects back to initial point P<sub>0</sub>.<br>• Drag points to move coordinates. Right-click any point to delete it.`;
+                } else {
+                    hintBody.innerHTML = `• Click to append points in sequence from P<sub>0</sub> to P<sub>last</sub>.<br>• Drag points to move coordinates. Right-click any point to delete it.`;
+                }
+            } else {
+                hintTitle.innerHTML = `<svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Nearest Line Insertion Active`;
+                if (state.isClosed) {
+                    hintBody.innerHTML = `• Click near a closed loop line segment to insert a point between its endpoints.<br>• Drag points to adjust coordinates. Right-click any point to delete it.`;
+                } else {
+                    hintBody.innerHTML = `• Click near an open polyline segment to insert a point into the sequence.<br>• Drag points to adjust coordinates. Right-click any point to delete it.`;
+                }
+            }
+
             // Stats Bar
             document.getElementById('stat-points-count').textContent = state.points.length;
             document.getElementById('badge-count').textContent = state.points.length;
@@ -924,10 +1054,22 @@
             document.getElementById('stat-perimeter').innerHTML = `${perimeter.toFixed(1)} <span class="text-[10px] text-slate-500 font-normal">px</span>`;
 
             const area = calculateShoelaceArea();
-            document.getElementById('stat-area').innerHTML = `${area.toFixed(1)} <span class="text-[10px] text-slate-500 font-normal">px²</span>`;
+            if (area === null) {
+                document.getElementById('stat-area').innerHTML = `<span class="text-xs text-slate-400 font-normal">N/A (Open)</span>`;
+            } else {
+                document.getElementById('stat-area').innerHTML = `${area.toFixed(1)} <span class="text-[10px] text-slate-500 font-normal">px²</span>`;
+            }
 
             const bbox = getBoundingBox();
             document.getElementById('stat-bbox').textContent = `${bbox.width}×${bbox.height}`;
+
+            // Sequence Indicator
+            const seqInd = document.getElementById('table-seq-indicator');
+            if (state.isClosed) {
+                seqInd.innerHTML = `P<sub>0</sub> → ... → P<sub>n-1</sub> → P<sub>0</sub>`;
+            } else {
+                seqInd.innerHTML = `P<sub>0</sub> → P<sub>1</sub> → ... → P<sub>n-1</sub>`;
+            }
 
             // Sync Textarea Output
             const csvArea = document.getElementById('csv-input-output');
@@ -1023,16 +1165,18 @@
             if (existingIdx !== -1) {
                 state.draggedPointIndex = existingIdx;
             } else {
-                if (state.points.length < 3) {
-                    state.points.push({ x: coords.x, y: coords.y, id: state.nextId++ });
-                    state.draggedPointIndex = state.points.length - 1;
-                    showToast(`Added P${state.points.length - 1} at (${coords.x}, ${coords.y})`, 'success');
-                } else {
-                    const segIdx = getNearestSegmentIndex(coords, state.points);
+                if (state.clickMode === 'nearest' && state.points.length >= 2) {
+                    const segIdx = getNearestSegmentIndex(coords, state.points, state.isClosed);
                     const insertPos = segIdx + 1;
                     state.points.splice(insertPos, 0, { x: coords.x, y: coords.y, id: state.nextId++ });
                     state.draggedPointIndex = insertPos;
-                    showToast(`Inserted P${insertPos} into segment P${segIdx}→P${(segIdx + 1) % (state.points.length - 1)}`, 'success');
+                    const nextSegPointIdx = (segIdx + 1) % (state.points.length - 1);
+                    showToast(`Inserted P${insertPos} between P${segIdx} and P${nextSegPointIdx}`, 'success');
+                } else {
+                    // Sequential Mode (or Nearest Mode when < 2 points exist)
+                    state.points.push({ x: coords.x, y: coords.y, id: state.nextId++ });
+                    state.draggedPointIndex = state.points.length - 1;
+                    showToast(`Added P${state.points.length - 1} at (${coords.x}, ${coords.y})`, 'success');
                 }
             }
 
@@ -1055,8 +1199,13 @@
                 const hoverIdx = findPointAtCoordinates(coords);
                 state.hoveredPointIndex = hoverIdx !== -1 ? hoverIdx : null;
 
-                if (state.hoveredPointIndex === null && state.points.length >= 3) {
-                    state.hoveredSegmentIndex = getNearestSegmentIndex(coords, state.points);
+                if (state.hoveredPointIndex === null && state.clickMode === 'nearest') {
+                    const numEdges = state.isClosed ? state.points.length : state.points.length - 1;
+                    if (numEdges >= 1) {
+                        state.hoveredSegmentIndex = getNearestSegmentIndex(coords, state.points, state.isClosed);
+                    } else {
+                        state.hoveredSegmentIndex = null;
+                    }
                 } else {
                     state.hoveredSegmentIndex = null;
                 }
@@ -1108,6 +1257,29 @@
         canvas.addEventListener('touchend', handlePointerUp);
 
         /**
+         * Mode & Figure Selection
+         */
+        function setClickMode(mode) {
+            state.clickMode = mode;
+            updateUI();
+            render();
+            showToast(`Click mode: ${mode === 'sequential' ? 'Sequential (Append)' : 'Nearest Line (Insert)'}`, 'info');
+        }
+
+        function setFigureType(isClosed) {
+            saveHistory();
+            state.isClosed = isClosed;
+            updateUI();
+            render();
+            showToast(`Figure geometry: ${state.isClosed ? 'Closed Loop' : 'Open Polyline'}`, 'info');
+        }
+
+        document.getElementById('btn-mode-sequential').addEventListener('click', () => setClickMode('sequential'));
+        document.getElementById('btn-mode-nearest').addEventListener('click', () => setClickMode('nearest'));
+        document.getElementById('btn-fig-closed').addEventListener('click', () => setFigureType(true));
+        document.getElementById('btn-fig-open').addEventListener('click', () => setFigureType(false));
+
+        /**
          * Batch Transform Operations (Scale & Shift)
          */
         function transformPoints({ offsetX = 0, offsetY = 0, scaleX = 1, scaleY = 1, pivotType = 'centroid' }) {
@@ -1154,7 +1326,7 @@
             const shiftX = Math.round(200 - cx);
             const shiftY = Math.round(200 - cy);
             transformPoints({ offsetX: shiftX, offsetY: shiftY, scaleX: 1, scaleY: 1, pivotType: 'origin' });
-            showToast(`Centered polygon in 400×400 grid`, 'success');
+            showToast(`Centered shape in 400×400 grid`, 'success');
         }
 
         function fitToGrid() {
@@ -1167,8 +1339,8 @@
             const h = bbox.maxY - bbox.minY;
             if (w === 0 && h === 0) return;
 
-            const padding = 20; // 20px padding around grid
-            const targetSize = LOGICAL_SIZE - padding * 2; // 360px
+            const padding = 20;
+            const targetSize = LOGICAL_SIZE - padding * 2;
             const scaleX = w > 0 ? targetSize / w : 1;
             const scaleY = h > 0 ? targetSize / h : 1;
             const scale = Math.min(scaleX, scaleY);
@@ -1195,7 +1367,7 @@
 
             render();
             updateUI();
-            showToast(`Fitted polygon (Scaled ${(scale * 100).toFixed(0)}%)`, 'success');
+            showToast(`Fitted shape (Scaled ${(scale * 100).toFixed(0)}%)`, 'success');
         }
 
         /**
@@ -1353,7 +1525,7 @@
             const sy = (parseFloat(inputScaleY.value) || 100) / 100;
             const pivot = document.getElementById('select-pivot').value;
             transformPoints({ offsetX: 0, offsetY: 0, scaleX: sx, scaleY: sy, pivotType: pivot });
-            showToast(`Scaled polygon by X:${(sx*100).toFixed(0)}%, Y:${(sy*100).toFixed(0)}%`, 'info');
+            showToast(`Scaled shape by X:${(sx*100).toFixed(0)}%, Y:${(sy*100).toFixed(0)}%`, 'info');
         });
 
         // Top Toolbar Controls
