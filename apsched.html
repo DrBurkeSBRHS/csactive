@@ -3,7 +3,763 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AP CSP & PLTW 160-Day Pacing Hub</title><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AP CSP & PLTW 160-Day Pacing Hub</title>
+  <style>
+    :root {
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --accent: #2563eb;
+      --block-accent: #7c3aed;
+      --ap-color: #0284c7;
+      --create-pt-color: #d97706;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+      --today-bg: #fefce8;
+      --today-border: #eab308;
+      --success: #16a34a;
+      --success-bg: #f0fdf4;
+      --success-border: #86efac;
+      --warning-bg: #fffbeb;
+      --warning-border: #fcd34d;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; }
+
+    .app-container { max-width: 1380px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+    header { background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .header-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+    h1 { font-size: 1.65rem; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 10px; }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+
+    /* Dashboard Metrics */
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .metric-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; }
+    .metric-title { font-size: 0.72rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .metric-value { font-size: 1.45rem; font-weight: 800; color: var(--primary); margin-top: 2px; }
+    .metric-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+    /* Controls Grid */
+    .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; background: #f1f5f9; padding: 16px; border-radius: 8px; align-items: end; }
+    .control-group { display: flex; flex-direction: column; gap: 6px; }
+    .control-group label { font-weight: 700; font-size: 0.78rem; color: var(--primary); text-transform: uppercase; letter-spacing: 0.4px; }
+    
+    .btn-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    button { background: var(--accent); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.2s, opacity 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    button:hover { opacity: 0.95; }
+    button.secondary { background: #cbd5e1; color: var(--primary); }
+    button.secondary:hover { background: #94a3b8; }
+    button.outline { background: white; border: 1px solid var(--border); color: var(--primary); }
+    button.outline:hover { background: #f1f5f9; }
+
+    .offset-display { font-weight: 800; font-size: 0.95rem; color: var(--accent); min-width: 90px; text-align: center; background: white; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+    input[type="text"], select, input[type="date"] { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.88rem; width: 100%; background: white; }
+
+    /* Main Content Weeks */
+    .week-block { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .week-header { background: #f8fafc; padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .week-title { font-weight: 800; font-size: 1.05rem; color: var(--primary); }
+    .week-unit { font-size: 0.8rem; font-weight: 700; color: var(--accent); background: #eff6ff; padding: 4px 10px; border-radius: 20px; border: 1px solid #bfdbfe; }
+
+    .days-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; padding: 20px; }
+    
+    /* Day Card */
+    .day-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: #ffffff; display: flex; flex-direction: column; gap: 10px; position: relative; transition: box-shadow 0.2s; }
+    .day-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .day-card.is-today { background: var(--today-bg); border: 2px solid var(--today-border); }
+    .day-card.completed { background: var(--success-bg); border-color: var(--success-border); opacity: 0.9; }
+    .day-card.block-day { border-top: 4px solid var(--block-accent); }
+    .day-card.create-pt-day { border-top: 4px solid var(--create-pt-color); }
+    .day-card.compressed-day { border-left: 4px solid #f59e0b; }
+
+    .day-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .day-date { font-weight: 800; font-size: 0.92rem; color: var(--primary); }
+    .badge-container { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+    
+    .today-tag { background: #fde047; color: #854d0e; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    .day-badge { font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    .badge-55 { background: #e0f2fe; color: #0369a1; }
+    .badge-88 { background: #f3e8ff; color: #6b21a8; }
+    .badge-pt { background: #fef3c7; color: #b45309; }
+    .badge-compressed { background: #fef3c7; color: #78350f; }
+
+    .pltw-topic { font-weight: 700; font-size: 0.9rem; color: var(--accent); line-height: 1.35; }
+    
+    .section-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--muted); margin-top: 4px; letter-spacing: 0.5px; }
+    .task-list { font-size: 0.82rem; color: #334155; padding-left: 16px; }
+    .task-list li { margin-bottom: 3px; }
+    
+    .ap-box { background: #f0f9ff; border-left: 3px solid var(--ap-color); padding: 8px 10px; border-radius: 0 6px 6px 0; font-size: 0.8rem; color: #0c4a6e; }
+    .ap-box-title { font-weight: 800; color: var(--ap-color); font-size: 0.68rem; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.4px; }
+
+    .teacher-note-area { font-size: 0.78rem; width: 100%; padding: 6px 8px; border: 1px dashed var(--border); border-radius: 6px; background: #fafafa; resize: vertical; min-height: 44px; }
+
+    .card-footer { margin-top: auto; padding-top: 10px; border-top: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .checkbox-label { font-size: 0.8rem; font-weight: 700; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 6px; user-select: none; }
+    .checkbox-label input { accent-color: var(--success); width: 16px; height: 16px; }
+
+    /* Modal System */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: white; border-radius: 12px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+    .modal-header h2 { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+    .close-btn { background: none; border: none; font-size: 1.4rem; color: var(--muted); cursor: pointer; padding: 0 4px; }
+
+    .blackout-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-height: 160px; overflow-y: auto; }
+    .blackout-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.85rem; }
+
+    .policy-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+    .policy-table th, .policy-table td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+    .policy-table th { background: #f8fafc; font-weight: 700; color: var(--primary); }
+
+    .strategy-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    .strategy-title { font-weight: 800; font-size: 0.9rem; color: var(--primary); margin-bottom: 4px; }
+
+    @media print {
+      body { background: white; padding: 0; }
+      header, .controls-grid, .metrics-grid, .card-footer, button { display: none !important; }
+      .week-block { page-break-inside: avoid; border: 1px solid #000; margin-bottom: 15px; }
+      .days-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
+      .day-card { border: 1px solid #ccc; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <header>
+    <div class="header-top">
+      <div>
+        <h1>AP CSP & PLTW 160-Day Dynamic Pacing Hub</h1>
+        <p class="subtitle">Class Pattern: Tue (55m), Wed (88m Block), Thu (55m), Fri (55m) | College Board Exam & Create PT Alignment</p>
+      </div>
+      <div class="btn-group">
+        <button onclick="openModal('grading-modal')" class="outline">📊 Grading Mechanics</button>
+        <button onclick="openModal('strategy-modal')" class="outline">🗺️ Content Strategy</button>
+        <button onclick="openModal('settings-modal')" class="secondary">⚙️ Calendar Settings</button>
+        <button onclick="exportJSON()" class="secondary">📥 Export JSON</button>
+        <button onclick="triggerImportJSON()" class="secondary">📤 Import JSON</button>
+        <input type="file" id="import-file-input" style="display: none;" onchange="importJSON(event)">
+      </div>
+    </div>
+
+    <!-- Dashboard Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-title">Course Completion</div>
+        <div class="metric-value" id="metric-progress">0%</div>
+        <div class="metric-sub" id="metric-progress-sub">0 of 160 Class Days</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Create PT Dedicated Time</div>
+        <div class="metric-value" id="metric-pt-hours">0.0 / 12.0 hrs</div>
+        <div class="metric-sub">12 Dedicated In-Class Days</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Schedule Offset</div>
+        <div class="metric-value" id="metric-offset-stat">0 Days</div>
+        <div class="metric-sub" id="metric-offset-sub">On baseline target</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Blackout Exception Days</div>
+        <div class="metric-value" id="metric-blackout-count">0 Days</div>
+        <div class="metric-sub">Holidays & Closures Excluded</div>
+      </div>
+    </div>
+
+    <!-- Controls Toolbar -->
+    <div class="controls-grid">
+      <div class="control-group">
+        <label>Schedule Shift Adjuster (Pacing Offset)</label>
+        <div class="btn-group">
+          <button class="secondary" onclick="adjustOffset(-1)">-1 Day</button>
+          <span class="offset-display" id="offset-label">0 Days</span>
+          <button class="secondary" onclick="adjustOffset(1)">+1 Day</button>
+          <button class="secondary" onclick="resetOffset()">Reset</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Filter by Unit</label>
+        <select id="unit-filter" onchange="renderSchedule()">
+          <option value="ALL">All Course Units (160 Days)</option>
+          <option value="Unit 1: Creative Computing for All">Unit 1: Creative Computing for All (44d)</option>
+          <option value="Unit 2: Every Bit of the Internet">Unit 2: Every Bit of the Internet (41d)</option>
+          <option value="Unit 3: Little Data to Big Data">Unit 3: Little Data to Big Data (39d)</option>
+          <option value="AP Create Performance Task Studio">AP Create PT Studio (12d)</option>
+          <option value="AP Exam Review & Diagnostics">AP Exam Review & Diagnostics (3d)</option>
+          <option value="Unit 4: Solving Complex Problems">Unit 4: Post-Exam Solving Complex Problems (21d)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Search Lessons & AP Content</label>
+        <input type="text" id="search-input" placeholder="Filter activity, topic, AP Daily video..." oninput="renderSchedule()">
+      </div>
+    </div>
+  </header>
+
+  <main id="schedule-container"></main>
+</div>
+
+<!-- Grading Policy Modal -->
+<div class="modal-overlay" id="grading-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Grading Mechanics & Credit Allocation</h2>
+      <button class="close-btn" onclick="closeModal('grading-modal')">&times;</button>
+    </div>
+    <p style="font-size: 0.88rem; color: var(--muted); margin-bottom: 12px;">This course balances daily hands-on PLTW pair programming with AP Classroom retrieval practice and exam preparation.</p>
+    
+    <table class="policy-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Weight</th>
+          <th>Pedagogical & Assessment Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Formative Classwork</strong></td>
+          <td>20%</td>
+          <td>Daily PLTW lab execution, trace tables, pair-programming participation. Checked for completion.</td>
+        </tr>
+        <tr>
+          <td><strong>AP Homework</strong></td>
+          <td>10%</td>
+          <td>AP Daily video notes and asynchronous prep (2-3x/week). Spot-checked for completion.</td>
+        </tr>
+        <tr>
+          <td><strong>AP Benchmarks (PPCs)</strong></td>
+          <td>15%</td>
+          <td>AP Classroom Personal Progress Checks. Graded for accuracy with retake opportunities.</td>
+        </tr>
+        <tr>
+          <td><strong>Summative Projects</strong></td>
+          <td>30%</td>
+          <td>Major PLTW unit projects evaluated using official College Board Create PT rubrics.</td>
+        </tr>
+        <tr>
+          <td><strong>Summative Unit Exams</strong></td>
+          <td>25%</td>
+          <td>AP Question Bank exams scored on an AP curved scale (~70% raw accuracy = 90% A-).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Strategy Modal -->
+<div class="modal-overlay" id="strategy-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Content Prioritization & Pacing Rules</h2>
+      <button class="close-btn" onclick="closeModal('strategy-modal')">&times;</button>
+    </div>
+
+    <div class="strategy-card">
+      <div class="strategy-title">✅ Essential Core (Must Keep Intact)</div>
+      <p style="font-size: 0.85rem; color: #334155;">Python programming fundamentals (Lessons 1.1–1.2), Internet protocols & encryption (Lessons 2.1–2.2), Data processing & visualization (Lessons 3.1–3.2), and the 12-hour Create PT studio block.</p>
+    </div>
+
+    <div class="strategy-card">
+      <div class="strategy-title">⚡ Compressible Modules (Time-Saving Hacks)</div>
+      <ul style="font-size: 0.85rem; color: #334155; padding-left: 18px;">
+        <li><strong>Activities 2.2.6 & 2.2.7 (Tkinter GUIs):</strong> Compressed from 8 days to 3 days using starter templates (GUI syntax is not tested on AP Exam).</li>
+        <li><strong>Activities 3.1.2 & 3.1.3 (Vernier Sensors):</strong> Bypassed hardware setup by supplying pre-formatted CSV datasets directly.</li>
+      </ul>
+    </div>
+
+    <div class="strategy-card">
+      <div class="strategy-title">⏩ Post-Exam Deferral</div>
+      <p style="font-size: 0.85rem; color: #334155;"><strong>Unit 4 (NetLogo Simulations & AI):</strong> The entire 21-day unit is deferred to the May post-AP Exam window to preserve studio time for the Create PT.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Settings & Blackout Modal -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Schedule & Calendar Settings</h2>
+      <button class="close-btn" onclick="closeModal('settings-modal')">&times;</button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div class="control-group">
+        <label>Course Baseline Start Date (Class Day 0)</label>
+        <input type="date" id="start-date-input" onchange="updateStartDate(this.value)">
+      </div>
+
+      <div class="control-group">
+        <label>Add Non-School Day / Blackout Exception</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="date" id="blackout-date-input">
+          <button onclick="addBlackoutDate()">Add Blackout</button>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-weight: 700; font-size: 0.8rem; color: var(--primary); text-transform: uppercase;">Configured Blackout Dates</label>
+        <div class="blackout-list" id="blackout-list-container"></div>
+      </div>
+
+      <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end;">
+        <button onclick="closeModal('settings-modal')">Save & Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Baseline Configuration
+let courseStartDate = localStorage.getItem('ap_csp_160_start_date') || '2026-09-01'; // Default Sept 1, 2026
+let currentOffset = parseInt(localStorage.getItem('ap_csp_160_offset')) || 0;
+let completedDays = JSON.parse(localStorage.getItem('ap_csp_160_completed')) || {};
+let teacherNotes = JSON.parse(localStorage.getItem('ap_csp_160_notes')) || {};
+let blackoutDates = JSON.parse(localStorage.getItem('ap_csp_160_blackouts')) || ['2026-09-07', '2026-11-11', '2026-11-26', '2026-11-27', '2026-12-25', '2027-01-01'];
+
+// Master Function to Generate 160-Day Full Year Sequence
+function generateFullYearSequence() {
+  const sequence = [];
+  let dayIdx = 0;
+
+  // Helper to append a topic
+  function addLessonDays(unit, pltwBase, daysCount, apHwBase, assessmentBase, inClassTasks, isCompressed = false, isCreatePt = false, ptMins = 0) {
+    for (let i = 1; i <= daysCount; i++) {
+      const weekNum = Math.floor(dayIdx / 4) + 1;
+      const dayOfWeekMod = dayIdx % 4; // 0=Tue(55), 1=Wed(88), 2=Thu(55), 3=Fri(55)
+      const durationType = (dayOfWeekMod === 1) ? "88" : "55";
+
+      sequence.push({
+        classDayIndex: dayIdx,
+        week: weekNum,
+        unit: unit,
+        type: durationType,
+        pltw: `${pltwBase} (Day ${i} of ${daysCount})`,
+        inClass: inClassTasks,
+        apHomework: typeof apHwBase === 'function' ? apHwBase(i) : apHwBase,
+        assessment: typeof assessmentBase === 'function' ? assessmentBase(i) : assessmentBase,
+        isCompressed: isCompressed,
+        ptMinutes: isCreatePt ? (durationType === "88" ? 88 : 55) : ptMins
+      });
+      dayIdx++;
+    }
+  }
+
+  // --- UNIT 1: Creative Computing for All (44 Days) ---
+  // Lesson 1.1: Algorithms (23 days)
+  addLessonDays("Unit 1: Creative Computing for All", "Activity 1.1.1: Algorithmic Thinking", 2, "AP Daily Topic 3.1 (Variables)", "Formative check on variable assignment.", ["Analyze pseudocode algorithms.", "Trace variable updates."]);
+  addLessonDays("Unit 1: Creative Computing for All", "Activity 1.1.2: Planning a Picture", 2, "AP Daily Topic 3.2 (Data Abstraction)", "Flowchart logic rubric.", ["Design algorithm flowcharts.", "Plan turtle graphics sequences."]);
+  addLessonDays("Unit 1: Creative Computing for All", "Activity 1.1.3: Fun with Flowers", 2, "AP Daily Topic 3.3 (Mathematical Expressions)", "Check math operator syntax.", ["Write modular Python scripts.", "Calculate geometric coordinates."]);
+  addLessonDays("Unit 1: Creative Computing for All", "Activity 1.1.4: Spinning with Spirographs", 3, "AP Daily Topic 3.5 (Boolean Expressions)", "Relational operator quiz.", ["Implement nested loops.", "Parametrize turtle shapes."]);
+  addLessonDays("Unit 1: Creative Computing for All", "Activity 1.1.5: Run Robot, Run", 1, "AP Daily Topic 3.7 (Nested Conditionals)", "Formative trace table.", ["Simulate robot grid movements."]);
+  addLessonDays("Unit 1: Creative Computing for All", "Activity 1.1.6: Buggy Image", 4, "AP Daily Topic 1.4 (Identifying Errors)", "Debugging check.", ["Diagnose syntax vs logic errors.", "Refactor turtle code."]);
+  addLessonDays("Unit 1: Creative Computing for All", "Activity 1.1.7: Traversing Turtles", 3, "AP Daily Topic 3.8 (Iteration)", "Trace table submission.", ["Use 'for' loops with turtle lists.", "Traverse list indexes."]);
+  addLessonDays("Unit 1: Creative Computing for All", "Activity 1.1.8: Turtles in Traffic", 3, "AP Daily Topic 3.6 (Conditionals)", "Check collision logic.", ["Implement 'if/else' statements.", "Detect turtle collisions."]);
+  addLessonDays("Unit 1: Creative Computing for All", "Project 1.1.9: Algorithms and Art", 3, "AP Classroom PPC Unit 3 Prep", "Project Rubric (Summative 30%)", ["Develop original turtle art algorithm.", "Enforce 1 list, 1 loop, 1 conditional."]);
+
+  // Lesson 1.2: Abstraction (17 days)
+  addLessonDays("Unit 1: Creative Computing for All", "Activity 1.2.1: Catch-A-Turtle", 3, "AP Daily Topic 3.12 (Calling Procedures)", "Function syntax check.", ["Bind click events to procedures.", "Manage global state."]);
+  addLessonDays("Unit 1: Creative Computing for All", "Activity 1.2.2: Catch-A-Turtle Leaderboard", 4, "AP Daily Topic 3.10 (Lists)", "List index trace.", ["Append scores to leaderboards.", "Sort scores via procedures."]);
+  addLessonDays("Unit 1: Creative Computing for All", "Activity 1.2.3: Apple Avalanche", 3, "AP Daily Topic 3.14 (Libraries)", "Event handling check.", ["Animate falling screen objects.", "Implement key press bindings."]);
+  addLessonDays("Unit 1: Creative Computing for All", "Activity 1.2.4: Turtle Escape", 3, "AP Daily Topic 3.15 (Random Numbers)", "Boundary logic review.", ["Generate random positions.", "Implement maze collision checks."]);
+  addLessonDays("Unit 1: Creative Computing for All", "Project 1.2.5: Shall We Play a Game?", 4, "AP Classroom Unit 3 PPC Part 1", "Major Project Grade", ["Build interactive python game.", "Write procedure with parameters."]);
+
+  // Lesson 1.3: Artistic Expression (4 days)
+  addLessonDays("Unit 1: Creative Computing for All", "Problem 1.3.1: Artistic Expression", 4, "Prepare for Unit 1 Exam", "Unit 1 Summative Exam (25%)", ["Synthesize algorithms and abstraction.", "Conduct peer code reviews."]);
+
+  // --- UNIT 2: Every Bit of the Internet (41 Days) ---
+  // Lesson 2.1: Data Diligence (16 days)
+  addLessonDays("Unit 2: Every Bit of the Internet", "Activity 2.1.1: Phishing Warning", 2, "AP Daily Topic 5.1 (Social Engineering)", "Security awareness check.", ["Identify phishing URLs.", "Analyze email headers."]);
+  addLessonDays("Unit 2: Every Bit of the Internet", "Activity 2.1.2: Encryption", 3, "AP Daily Topic 5.6 (Safe Computing)", "Caesar cipher calculation.", ["Implement symmetric encryption.", "Compare public vs private key systems."]);
+  addLessonDays("Unit 2: Every Bit of the Internet", "Activity 2.1.3: Passwords", 2, "AP Daily Topic 5.2 (Authentication)", "Password entropy analysis.", ["Calculate password brute-force time.", "Implement MFA rules."]);
+  addLessonDays("Unit 2: Every Bit of the Internet", "Activity 2.1.4: User Experience", 3, "AP Daily Topic 5.3 (Fault Tolerance)", "UX evaluation rubric.", ["Evaluate app UI accessibility.", "Design user feedback loops."]);
+  addLessonDays("Unit 2: Every Bit of the Internet", "Activity 2.1.5: Sloppy Code", 2, "AP Daily Topic 1.4 (Code Refactoring)", "Refactoring check.", ["Clean messy code bases.", "Standardize variable names."]);
+  addLessonDays("Unit 2: Every Bit of the Internet", "Project 2.1.6: pHishy Fish Tank", 4, "AP Classroom Unit 5 PPC", "Project Rubric Grade", ["Build security simulation tool.", "Document cybersecurity risk."]);
+
+  // Lesson 2.2: How the Internet Works (20 days)
+  addLessonDays("Unit 2: Every Bit of the Internet", "Activity 2.2.1: Explore Task 1", 3, "AP Daily Topic 5.1 (Computing Innovations)", "Innovation impact writeup.", ["Analyze computing innovation data.", "Identify beneficial & harmful effects."]);
+  addLessonDays("Unit 2: Every Bit of the Internet", "Activity 2.2.2: A Little Bit of Data", 2, "AP Daily Topic 2.1 (Binary Numbers)", "Binary conversion check.", ["Convert binary, decimal, and hex.", "Examine overflow errors."]);
+  addLessonDays("Unit 2: Every Bit of the Internet", "Activity 2.2.3: Transmission", 3, "AP Daily Topic 5.4 (Internet Networks)", "Packet routing trace.", ["Simulate IP packet routing.", "Examine TCP/IP handshake."]);
+  addLessonDays("Unit 2: Every Bit of the Internet", "Activity 2.2.4: Parallel & Distributed", 2, "AP Daily Topic 5.5 (Distributed Computing)", "Speedup calculation.", ["Calculate parallel computing speedup.", "Compare sequential vs parallel."]);
+  addLessonDays("Unit 2: Every Bit of the Internet", "Activity 2.2.5: Explore Task 2", 2, "AP Daily Topic 5.2 (Data Privacy)", "Privacy analysis check.", ["Examine PII collection rules.", "Analyze data breach cases."]);
+  addLessonDays("Unit 2: Every Bit of the Internet", "Activity 2.2.6: GUI Situation", 3, "AP Daily Topic 3.12 (Event GUIs)", "GUI event binding check.", ["Use GUI starter templates.", "Connect event handlers to buttons."], true);
+  addLessonDays("Unit 2: Every Bit of the Internet", "Project 2.2.7: Command Line GUI", 5, "AP Classroom Unit 5 Progress Check", "Unit 2 Summative Exam", ["Build desktop GUI utility.", "Integrate file I/O operations."], true);
+
+  // Lesson 2.3: Custom Encoder (5 days)
+  addLessonDays("Unit 2: Every Bit of the Internet", "Problem 2.3.1: Custom Encoder", 5, "Review AP Unit 5 Questions", "Problem 2.3.1 Evaluation", ["Build custom string encoder.", "Test against lossy vs lossless rules."]);
+
+  // --- UNIT 3: Little Data to Big Data (39 Days) ---
+  // Lesson 3.1: Little Data (20 days)
+  addLessonDays("Unit 3: Little Data to Big Data", "Activity 3.1.1: Data Visualization", 2, "AP Daily Topic 2.2 (Data Compression)", "Chart interpretation check.", ["Plot datasets with matplotlib/charts.", "Compare lossy vs lossless compression."]);
+  addLessonDays("Unit 3: Little Data to Big Data", "Activity 3.1.2: Sound Analysis", 4, "AP Daily Topic 2.3 (Extracting Data)", "CSV data extraction check.", ["Bypass Vernier sensor via supplied CSV.", "Extract sound frequency trends."], true);
+  addLessonDays("Unit 3: Little Data to Big Data", "Activity 3.1.3: Color of Light", 4, "AP Daily Topic 2.3 (Data Filtering)", "Metadata filter check.", ["Bypass hardware setup via CSV.", "Filter RGB values in Python."], true);
+  addLessonDays("Unit 3: Little Data to Big Data", "Activity 3.1.4: CO2 Rising", 4, "AP Daily Topic 2.3 (Transforming Data)", "Data transformation lab.", ["Process global CO2 datasets.", "Filter invalid data entries."]);
+  addLessonDays("Unit 3: Little Data to Big Data", "Activity 3.1.5: Gaming with Force", 4, "AP Daily Topic 3.10 (Data Abstraction)", "List filtering check.", ["Analyze sensor log records.", "Map data arrays to graphics."]);
+  addLessonDays("Unit 3: Little Data to Big Data", "Project 3.1.6: Rover Phone Home", 2, "AP Classroom Unit 2 PPC", "Project Rubric", ["Build space dataset filter.", "Present visual data findings."]);
+
+  // Lesson 3.2: Trendy Data (14 days)
+  addLessonDays("Unit 3: Little Data to Big Data", "Activity 3.2.1: Temperature Trends", 3, "AP Daily Topic 2.3 (Big Data Patterns)", "Trend calculation check.", ["Parse multi-year climate logs.", "Calculate moving averages."]);
+  addLessonDays("Unit 3: Little Data to Big Data", "Activity 3.2.2: Shocking Data", 4, "AP Daily Topic 3.8 (Dataset Iteration)", "Python dictionary trace.", ["Filter large JSON data files.", "Extract target key-value pairs."]);
+  addLessonDays("Unit 3: Little Data to Big Data", "Activity 3.2.3: Pirates & Crowdsourcing", 3, "AP Daily Topic 2.3 (Crowdsourcing)", "Crowdsource bias writeup.", ["Analyze crowdsourced maps.", "Identify bias in data collection."]);
+  addLessonDays("Unit 3: Little Data to Big Data", "Project 3.2.4: Making Meaning", 4, "AP Classroom Unit 2 & 3 Review", "Major Project Grade", ["Build complete data analysis app.", "Formulate data-driven hypothesis."]);
+
+  // Lesson 3.3: Predictions (5 days)
+  addLessonDays("Unit 3: Little Data to Big Data", "Problem 3.3.1: Predictive Modeling", 5, "AP Classroom Practice Benchmark", "Unit 3 Summative Exam", ["Train simple prediction rules.", "Evaluate model accuracy."]);
+
+  // --- AP CREATE PERFORMANCE TASK STUDIO (12 Days) ---
+  addLessonDays("AP Create Performance Task Studio", "AP Create PT: Studio Workroom", 12, "AP Digital Portfolio Guidelines Review", "College Board Statutory Requirement Check", ["Mandatory 12-hour in-class unassisted studio.", "Write program code, capture video, draft written responses."], false, true);
+
+  // --- AP EXAM REVIEW & DIAGNOSTICS (3 Days) ---
+  addLessonDays("AP Exam Review & Diagnostics", "AP Exam Practice & Diagnostic Review", 3, "AP Classroom Full Practice Exams", "AP Practice Diagnostic Score", ["Full-length AP practice exam.", "Item-by-item diagnostic review."]);
+
+  // --- UNIT 4: Solving Complex Problems (Post-Exam May Window - 21 Days) ---
+  addLessonDays("Unit 4: Solving Complex Problems", "Activity 4.1.1: NetLogo Simulations", 5, "Post-Exam Portfolio Reflections", "Simulations Checkpoint", ["Simulate epidemic spread models.", "Adjust agent variables."]);
+  addLessonDays("Unit 4: Solving Complex Problems", "Activity 4.1.2: Machine Learning & AI Ethics", 5, "AI Ethics Case Study Notes", "Ethics Written Paper", ["Train decision tree classifiers.", "Evaluate algorithmic bias."]);
+  addLessonDays("Unit 4: Solving Complex Problems", "Activity 4.1.3: Agent-Based Modeling", 5, "Model Design Flowchart", "Model Submission", ["Develop multi-agent ecosystems.", "Analyze emergent behavior."]);
+  addLessonDays("Unit 4: Solving Complex Problems", "Project 4.2.1: Final Capstone Showcase", 6, "Senior Portfolio Preparation", "Final Showcase Presentation", ["Develop capstone computing app.", "Present project showcase."]);
+
+  return sequence;
+}
+
+const masterClassSequence = generateFullYearSequence();
+
+function parseISODate(dateStr) {
+  const parts = dateStr.split('-');
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+function formatISODate(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function getClassDate(classDayIndex) {
+  const shiftedIndex = classDayIndex + currentOffset;
+  let date = parseISODate(courseStartDate);
+  let count = 0;
+
+  if (shiftedIndex >= 0) {
+    while (count < shiftedIndex) {
+      date.setDate(date.getDate() + 1);
+      const day = date.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+      const isoStr = formatISODate(date);
+      // Valid schedule pattern: Tue(2), Wed(3), Thu(4), Fri(5) and NOT in blackout
+      if ((day === 2 || day === 3 || day === 4 || day === 5) && !blackoutDates.includes(isoStr)) {
+        count++;
+      }
+    }
+  } else {
+    while (count > shiftedIndex) {
+      date.setDate(date.getDate() - 1);
+      const day = date.getDay();
+      const isoStr = formatISODate(date);
+      if ((day === 2 || day === 3 || day === 4 || day === 5) && !blackoutDates.includes(isoStr)) {
+        count--;
+      }
+    }
+  }
+  return date;
+}
+
+function formatDate(date) {
+  const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+  return date.toLocaleDateString('en-US', options);
+}
+
+function isSameDate(d1, d2) {
+  return d1.getFullYear() === d2.getFullYear() &&
+         d1.getMonth() === d2.getMonth() &&
+         d1.getDate() === d2.getDate();
+}
+
+function saveState() {
+  localStorage.setItem('ap_csp_160_offset', currentOffset);
+  localStorage.setItem('ap_csp_160_completed', JSON.stringify(completedDays));
+  localStorage.setItem('ap_csp_160_notes', JSON.stringify(teacherNotes));
+  localStorage.setItem('ap_csp_160_blackouts', JSON.stringify(blackoutDates));
+  localStorage.setItem('ap_csp_160_start_date', courseStartDate);
+}
+
+function adjustOffset(delta) {
+  currentOffset += delta;
+  saveState();
+  updateUI();
+}
+
+function resetOffset() {
+  currentOffset = 0;
+  saveState();
+  updateUI();
+}
+
+function toggleDayComplete(id) {
+  completedDays[id] = !completedDays[id];
+  saveState();
+  updateUI();
+}
+
+function saveTeacherNote(id, text) {
+  teacherNotes[id] = text;
+  saveState();
+}
+
+function updateStartDate(val) {
+  if (val) {
+    courseStartDate = val;
+    saveState();
+    updateUI();
+  }
+}
+
+function addBlackoutDate() {
+  const input = document.getElementById('blackout-date-input');
+  if (input.value && !blackoutDates.includes(input.value)) {
+    blackoutDates.push(input.value);
+    blackoutDates.sort();
+    input.value = '';
+    saveState();
+    renderBlackoutList();
+    updateUI();
+  }
+}
+
+function removeBlackoutDate(isoStr) {
+  blackoutDates = blackoutDates.filter(d => d !== isoStr);
+  saveState();
+  renderBlackoutList();
+  updateUI();
+}
+
+function renderBlackoutList() {
+  const container = document.getElementById('blackout-list-container');
+  container.innerHTML = '';
+  if (blackoutDates.length === 0) {
+    container.innerHTML = '<div style="font-size: 0.8rem; color: var(--muted);">No blackout dates configured.</div>';
+    return;
+  }
+  blackoutDates.forEach(d => {
+    const item = document.createElement('div');
+    item.className = 'blackout-item';
+    item.innerHTML = `
+      <span>${d} (${formatDate(parseISODate(d))})</span>
+      <button class="secondary" style="padding: 2px 6px; font-size: 0.75rem;" onclick="removeBlackoutDate('${d}')">Remove</button>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function openModal(id) {
+  if (id === 'settings-modal') {
+    document.getElementById('start-date-input').value = courseStartDate;
+    renderBlackoutList();
+  }
+  document.getElementById(id).classList.add('active');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function exportJSON() {
+  const data = { courseStartDate, currentOffset, completedDays, teacherNotes, blackoutDates };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ap_csp_160day_pacing_${formatISODate(new Date())}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function triggerImportJSON() {
+  document.getElementById('import-file-input').click();
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      const data = JSON.parse(evt.target.result);
+      if (data.courseStartDate) courseStartDate = data.courseStartDate;
+      if (typeof data.currentOffset === 'number') currentOffset = data.currentOffset;
+      if (data.completedDays) completedDays = data.completedDays;
+      if (data.teacherNotes) teacherNotes = data.teacherNotes;
+      if (data.blackoutDates) blackoutDates = data.blackoutDates;
+      saveState();
+      updateUI();
+      alert('Pacing schedule imported successfully!');
+    } catch (err) {
+      alert('Error parsing JSON backup file.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function calculateMetrics() {
+  const totalDays = masterClassSequence.length;
+  const completedCount = Object.values(completedDays).filter(Boolean).length;
+  const pct = Math.round((completedCount / totalDays) * 100) || 0;
+
+  let totalPtMinutes = 0;
+  masterClassSequence.forEach((item, idx) => {
+    if (completedDays[`day_${idx}`]) {
+      totalPtMinutes += item.ptMinutes || 0;
+    }
+  });
+  const ptHours = (totalPtMinutes / 60).toFixed(1);
+
+  document.getElementById('metric-progress').textContent = `${pct}%`;
+  document.getElementById('metric-progress-sub').textContent = `${completedCount} of ${totalDays} Class Days`;
+  document.getElementById('metric-pt-hours').textContent = `${ptHours} / 12.0 hrs`;
+  
+  const offsetLabel = `${currentOffset >= 0 ? '+' : ''}${currentOffset} Days`;
+  document.getElementById('metric-offset-stat').textContent = offsetLabel;
+  document.getElementById('metric-offset-sub').textContent = currentOffset === 0 ? 'On baseline schedule' : (currentOffset > 0 ? 'Ahead of schedule' : 'Behind schedule');
+  document.getElementById('offset-label').textContent = offsetLabel;
+  document.getElementById('metric-blackout-count').textContent = `${blackoutDates.length} Days`;
+}
+
+function updateUI() {
+  calculateMetrics();
+  renderSchedule();
+}
+
+function renderSchedule() {
+  const container = document.getElementById('schedule-container');
+  const searchFilter = document.getElementById('search-input').value.toLowerCase();
+  const selectedUnit = document.getElementById('unit-filter').value;
+  const today = new Date();
+
+  container.innerHTML = '';
+
+  const weeksMap = {};
+  masterClassSequence.forEach((item, index) => {
+    item.cardId = `day_${index}`;
+    item.computedDate = getClassDate(item.classDayIndex);
+
+    if (!weeksMap[item.week]) {
+      weeksMap[item.week] = { week: item.week, unit: item.unit, days: [] };
+    }
+    weeksMap[item.week].days.push(item);
+  });
+
+  Object.values(weeksMap).forEach(weekData => {
+    if (selectedUnit !== 'ALL' && !weekData.unit.startsWith(selectedUnit) && weekData.unit !== selectedUnit) {
+      return;
+    }
+
+    let weekHasMatches = false;
+
+    const weekEl = document.createElement('div');
+    weekEl.className = 'week-block';
+
+    const weekHeader = document.createElement('div');
+    weekHeader.className = 'week-header';
+    weekHeader.innerHTML = `
+      <span class="week-title">Week ${weekData.week}</span>
+      <span class="week-unit">${weekData.unit}</span>
+    `;
+    weekEl.appendChild(weekHeader);
+
+    const daysGrid = document.createElement('div');
+    daysGrid.className = 'days-grid';
+
+    weekData.days.forEach(day => {
+      const isDone = !!completedDays[day.cardId];
+      const isToday = isSameDate(day.computedDate, today);
+      const isBlock = day.type === "88";
+      const isCreatePt = day.ptMinutes > 0;
+
+      const searchText = `${day.pltw} ${day.inClass.join(' ')} ${day.apHomework} ${day.assessment} ${formatDate(day.computedDate)}`.toLowerCase();
+      if (searchFilter && !searchText.includes(searchFilter)) {
+        return;
+      }
+      weekHasMatches = true;
+
+      const card = document.createElement('div');
+      card.className = `day-card ${isBlock ? 'block-day' : ''} ${isCreatePt ? 'create-pt-day' : ''} ${day.isCompressed ? 'compressed-day' : ''} ${isToday ? 'is-today' : ''} ${isDone ? 'completed' : ''}`;
+
+      card.innerHTML = `
+        <div class="day-header">
+          <span class="day-date">${formatDate(day.computedDate)}</span>
+          <div class="badge-container">
+            ${isToday ? '<span class="today-tag">TODAY</span>' : ''}
+            ${day.isCompressed ? '<span class="day-badge badge-compressed">Compressed</span>' : ''}
+            ${isCreatePt ? `<span class="day-badge badge-pt">${day.ptMinutes}m Create PT</span>` : ''}
+            <span class="day-badge ${isBlock ? 'badge-88' : 'badge-55'}">
+              ${isBlock ? '88m Block' : '55m'}
+            </span>
+          </div>
+        </div>
+
+        <div class="pltw-topic">${day.pltw}</div>
+
+        <div>
+          <div class="section-title">In-Class Agenda</div>
+          <ul class="task-list">
+            ${day.inClass.map(item => `<li>${item}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="ap-box">
+          <div class="ap-box-title">AP Classroom Out-of-Class Homework</div>
+          <div>${day.apHomework}</div>
+        </div>
+
+        <div>
+          <div class="section-title">Assessment & Grading Category</div>
+          <div style="font-size: 0.8rem; color: #475569;">${day.assessment}</div>
+        </div>
+
+        <div>
+          <div class="section-title">Teacher Reminders & Sub Notes</div>
+          <textarea class="teacher-note-area" placeholder="Add custom notes..." oninput="saveTeacherNote('${day.cardId}', this.value)">${teacherNotes[day.cardId] || ''}</textarea>
+        </div>
+
+        <div class="card-footer">
+          <label class="checkbox-label">
+            <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleDayComplete('${day.cardId}')">
+            ${isDone ? 'Completed' : 'Mark Complete'}
+          </label>
+        </div>
+      `;
+
+      daysGrid.appendChild(card);
+    });
+
+    if (weekHasMatches) {
+      weekEl.appendChild(daysGrid);
+      container.appendChild(weekEl);
+    }
+  });
+
+  if (container.children.length === 0) {
+    container.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 40px;">No lesson days match the selected unit or search query.</div>';
+  }
+}
+
+// Initialize Application
+updateUI();
+</script>
+</body>
+</html>
   <style>
     :root {
       --primary: #0f172a;
