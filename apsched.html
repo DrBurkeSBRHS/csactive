@@ -3,395 +3,313 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AP CSP Pacing & Blending Tracker (PLTW + AP Classroom)</title>
+  <title>AP CSP Dynamic Pacing & Blending Calendar</title>
   <style>
     :root {
-      --primary: #1e293b;
+      --primary: #0f172a;
       --accent: #2563eb;
       --block-accent: #7c3aed;
       --ap-color: #0284c7;
       --bg: #f8fafc;
       --card-bg: #ffffff;
-      --text: #0f172a;
+      --text: #1e293b;
       --muted: #64748b;
-      --border: #e2e8f0;
-      --success: #16a34a;
+      --border: #cbd5e1;
+      --today-bg: #fefce8;
+      --today-border: #eab308;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; }
     
-    header { max-width: 1200px; margin: 0 auto 24px auto; background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    h1 { font-size: 1.6rem; color: var(--primary); margin-bottom: 6px; }
+    header { max-width: 1200px; margin: 0 auto 24px auto; background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+    h1 { font-size: 1.6rem; color: var(--primary); margin-bottom: 4px; }
     p.subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 16px; }
 
-    .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; background: #f1f5f9; padding: 16px; border-radius: 8px; }
+    .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; background: #f1f5f9; padding: 16px; border-radius: 8px; align-items: center; }
     .control-group { display: flex; flex-direction: column; gap: 6px; }
-    .control-group label { font-weight: 600; font-size: 0.85rem; color: var(--primary); }
+    .control-group label { font-weight: 700; font-size: 0.85rem; color: var(--primary); }
     
     .btn-group { display: flex; gap: 8px; align-items: center; }
-    button { background: var(--accent); color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: background 0.2s; }
+    button { background: var(--accent); color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: opacity 0.2s; }
     button:hover { opacity: 0.9; }
-    button.secondary { background: #e2e8f0; color: var(--text); }
-    button.secondary:hover { background: #cbd5e1; }
+    button.secondary { background: #cbd5e1; color: var(--primary); }
+    button.secondary:hover { background: #94a3b8; }
     
-    .offset-display { font-weight: 700; font-size: 1.1rem; color: var(--accent); min-width: 90px; text-align: center; }
-    
+    .offset-display { font-weight: 700; font-size: 1.05rem; color: var(--accent); min-width: 100px; text-align: center; }
     input[type="text"] { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.9rem; }
-
-    .progress-bar-container { margin-top: 16px; background: #e2e8f0; height: 10px; border-radius: 5px; overflow: hidden; }
-    .progress-bar { background: var(--success); height: 100%; width: 0%; transition: width 0.3s; }
 
     .main-content { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
 
-    .week-block { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
-    .week-header { background: #f8fafc; padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .week-block { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .week-header { background: #f1f5f9; padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
     .week-title { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
-    .week-unit { font-size: 0.85rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .week-unit { font-size: 0.85rem; font-weight: 600; color: var(--muted); text-transform: uppercase; }
 
     .days-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; padding: 20px; }
     
-    .day-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: #ffffff; display: flex; flex-direction: column; gap: 10px; position: relative; transition: border-color 0.2s, box-shadow 0.2s; }
-    .day-card.completed { background: #f0fdf4; border-color: #bbf7d0; opacity: 0.85; }
+    .day-card { border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: #ffffff; display: flex; flex-direction: column; gap: 10px; position: relative; }
+    .day-card.is-today { background: var(--today-bg); border: 2px solid var(--today-border); }
+    .day-card.completed { background: #f0fdf4; border-color: #86efac; opacity: 0.85; }
     .day-card.block-day { border-top: 4px solid var(--block-accent); }
     
     .day-header { display: flex; justify-content: space-between; align-items: flex-start; }
-    .day-name { font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; }
+    .day-date { font-weight: 700; font-size: 0.95rem; color: var(--primary); }
+    .today-tag { background: #fde047; color: #854d0e; font-size: 0.68rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    
     .day-badge { font-size: 0.7rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
     .badge-55 { background: #e0f2fe; color: #0369a1; }
     .badge-88 { background: #f3e8ff; color: #6b21a8; }
 
-    .pltw-topic { font-weight: 600; font-size: 0.9rem; color: var(--primary); }
+    .pltw-topic { font-weight: 700; font-size: 0.9rem; color: var(--accent); }
     
-    .section-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
-    .task-list { font-size: 0.85rem; color: #334155; padding-left: 18px; }
-    .task-list li { margin-bottom: 4px; }
+    .section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+    .task-list { font-size: 0.83rem; color: #334155; padding-left: 16px; }
+    .task-list li { margin-bottom: 3px; }
     
     .ap-box { background: #f0f9ff; border-left: 3px solid var(--ap-color); padding: 8px 10px; border-radius: 0 6px 6px 0; font-size: 0.82rem; }
-    .ap-box-title { font-weight: 700; color: var(--ap-color); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 2px; }
+    .ap-box-title { font-weight: 700; color: var(--ap-color); font-size: 0.72rem; text-transform: uppercase; margin-bottom: 2px; }
 
     .card-footer { margin-top: auto; padding-top: 8px; border-top: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center; }
     .checkbox-label { font-size: 0.8rem; font-weight: 600; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 6px; }
-
-    @media (max-width: 768px) {
-      body { padding: 10px; }
-      .days-grid { grid-template-columns: 1fr; }
-    }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>AP CSP Pacing & Blending Tracker</h1>
-  <p class="subtitle">PLTW Computer Science Principles + AP Classroom Integration Schedule (Tue/Wed-88m/Thu/Fri)</p>
+  <h1>AP CSP Dynamic Calendar Tracker</h1>
+  <p class="subtitle">PLTW CSP + AP Classroom | Class Days: Tue (55m), Wed (88m Block), Thu (55m), Fri (55m)</p>
   
   <div class="controls-grid">
     <div class="control-group">
-      <label>Schedule Shift Adjuster (Days Offset)</label>
+      <label>Schedule Shift Adjuster (Pacing Delay / Offset)</label>
       <div class="btn-group">
-        <button class="secondary" onclick="adjustOffset(-1)">-1 Day</button>
+        <button class="secondary" onclick="adjustOffset(-1)">-1 Class Day</button>
         <span class="offset-display" id="offset-label">0 Days</span>
-        <button class="secondary" onclick="adjustOffset(1)">+1 Day</button>
+        <button class="secondary" onclick="adjustOffset(1)">+1 Class Day</button>
         <button class="secondary" onclick="resetOffset()">Reset</button>
       </div>
     </div>
     <div class="control-group">
-      <label>Filter Schedule</label>
-      <input type="text" id="search-input" placeholder="Search topics, AP videos, or activities..." oninput="renderSchedule()">
+      <label>Filter Calendar</label>
+      <input type="text" id="search-input" placeholder="Filter by activity, topic, or AP video..." oninput="renderSchedule()">
     </div>
-  </div>
-
-  <div class="progress-bar-container">
-    <div class="progress-bar" id="progress-bar"></div>
   </div>
 </header>
 
-<main class="main-content" id="schedule-container">
-  <!-- Dynamic schedule cards will render here -->
-</main>
+<main class="main-content" id="schedule-container"></main>
 
 <script>
-// Master Schedule Data beginning at Traversing Turtles (1.1.7)
-const masterSchedule = [
+// Baseline Anchor: Class Day Index 0 = Tuesday, October 20, 2026
+// Class Day Index 2 = Thursday, October 22, 2026 (TODAY)
+const BASE_DATE = new Date(2026, 9, 20); // Month 9 = October
+
+const masterClassSequence = [
+  // WEEK 1
   {
     week: 1,
     unit: "Unit 1: Creative Computing for All",
-    days: [
-      {
-        id: "w1d1",
-        dayName: "Tuesday",
-        type: "55",
-        pltw: "Activity 1.1.7: Traversing Turtles (Day 2 of 3)",
-        inClass: [
-          "Focus: Iteration using Python 'for' loops and turtle lists.",
-          "Students refactor redundant step-by-step turtle movement code into compact loops.",
-          "Code tracing exercise: Tracking loop variables on whiteboards."
-        ],
-        apHomework: "AP Daily Topic 3.8 (Iteration - Video 1): 'REPEAT n TIMES' and basic flow of control.",
-        assessment: "Formative check: Verify list syntax and loop indentation."
-      },
-      {
-        id: "w1d2",
-        dayName: "Wednesday",
-        type: "88",
-        pltw: "Finish 1.1.7 & Start Activity 1.1.8: Turtles in Traffic (Day 1 of 3)",
-        inClass: [
-          "Block Part 1 (35m): Wrap up Traversing Turtles list iterations.",
-          "Block Part 2 (50m): Introduce Activity 1.1.8 conditionals (if/else).",
-          "Pair programming: Setting up collision checks between autonomous turtles."
-        ],
-        apHomework: "AP Daily Topic 3.5 (Boolean Expressions - Video 1): Relational operators (==, !=, <, >).",
-        assessment: "Check trace tables for conditional statement logic."
-      },
-      {
-        id: "w1d3",
-        dayName: "Thursday",
-        type: "55",
-        pltw: "Activity 1.1.8: Turtles in Traffic (Day 2 of 3)",
-        inClass: [
-          "Nested conditionals and combining Boolean operators (AND, OR, NOT).",
-          "Debugging turtle direction changes upon edge detection."
-        ],
-        apHomework: "AP Daily Topic 3.6 (Conditionals - Video 1): IF-ELSE decision logic.",
-        assessment: "Formative code review on nested logic."
-      },
-      {
-        id: "w1d4",
-        dayName: "Friday",
-        type: "55",
-        pltw: "Activity 1.1.8: Turtles in Traffic (Day 3 of 3)",
-        inClass: [
-          "Finalize traffic simulation code and execute boundary collision tests.",
-          "First 10 Mins: AP Classroom Topic 3.5 & 3.8 Warm-up Quiz (3 items)."
-        ],
-        apHomework: "Rest / Catch-up on missing AP Daily videos.",
-        assessment: "AP Topic Questions 3.5 & 3.8 (Graded for accuracy, participation weight)."
-      }
-    ]
+    classDayIndex: 0,
+    type: "55",
+    pltw: "Activity 1.1.7: Traversing Turtles (Day 1 of 3)",
+    inClass: [
+      "Introduce Python 'for' loops to refactor redundant turtle code.",
+      "Trace loop execution line-by-line using memory tables."
+    ],
+    apHomework: "AP Daily Topic 3.8 (Iteration - Video 1): 'REPEAT n TIMES' structure.",
+    assessment: "Check loop syntax and list iteration logic."
+  },
+  {
+    week: 1,
+    unit: "Unit 1: Creative Computing for All",
+    classDayIndex: 1,
+    type: "88",
+    pltw: "Activity 1.1.7: Traversing Turtles (Day 2 of 3)",
+    inClass: [
+      "Extended Block: Traversing list elements with turtle loops.",
+      "Debugging loop index bounds and variable re-assignments."
+    ],
+    apHomework: "AP Daily Topic 3.5 (Boolean Expressions - Video 1): Relational operators.",
+    assessment: "Formative check on list traversal."
+  },
+  {
+    week: 1,
+    unit: "Unit 1: Creative Computing for All",
+    classDayIndex: 2, // TODAY: Oct 22, 2026
+    type: "55",
+    pltw: "Activity 1.1.7: Traversing Turtles (Day 3 / Wrap-up)",
+    inClass: [
+      "Finalize turtle list traversal scripts.",
+      "Code tracing assessment: Evaluated variable assignment vs algebraic misconceptions."
+    ],
+    apHomework: "AP Daily Topic 3.6 (Conditionals - Video 1): IF-ELSE structures.",
+    assessment: "Trace table assignment submission."
+  },
+  {
+    week: 1,
+    unit: "Unit 1: Creative Computing for All",
+    classDayIndex: 3,
+    type: "55",
+    pltw: "Activity 1.1.8: Turtles in Traffic (Day 1 of 3)",
+    inClass: [
+      "Introduce selection statements ('if' / 'else') in Python.",
+      "Setting up collision detection logic between autonomous turtles."
+    ],
+    apHomework: "AP Daily Topic 3.6 (Conditionals - Video 2).",
+    assessment: "Formative review on Boolean conditions."
+  },
+
+  // WEEK 2
+  {
+    week: 2,
+    unit: "Unit 1: Creative Computing for All",
+    classDayIndex: 4,
+    type: "55",
+    pltw: "Activity 1.1.8: Turtles in Traffic (Day 2 of 3)",
+    inClass: [
+      "Combining logic operators (AND, OR, NOT) for complex decisions.",
+      "Boundary collision debugging in turtle simulations."
+    ],
+    apHomework: "AP Daily Topic 1.4 (Identifying and Correcting Errors - Video 1).",
+    assessment: "Check nested conditional statements."
   },
   {
     week: 2,
     unit: "Unit 1: Creative Computing for All",
-    days: [
-      {
-        id: "w2d1",
-        dayName: "Tuesday",
-        type: "55",
-        pltw: "Project 1.1.9: Algorithms and Art (Day 1 of 4)",
-        inClass: [
-          "Project kickoff: Designing an algorithmic artwork using loops and selection.",
-          "Drafting algorithm flowcharts and pseudocode before touching Python."
-        ],
-        apHomework: "AP Daily Topic 1.4 (Identifying and Correcting Errors - Video 1).",
-        assessment: "Collect & review algorithm design flowcharts."
-      },
-      {
-        id: "w2d2",
-        dayName: "Wednesday",
-        type: "88",
-        pltw: "Project 1.1.9: Algorithms and Art (Days 2 & 3 of 4)",
-        inClass: [
-          "Extended Studio Block: Implementing Python turtle art algorithms.",
-          "Mandatory inclusion: At least one list, one loop, and one conditional statement.",
-          "Peer debugging rounds during second half of block."
-        ],
-        apHomework: "AP Daily Topic 3.1 (Variables and Assignments - Review Video 2).",
-        assessment: "Mid-project code check (Verify functioning loops and logic)."
-      },
-      {
-        id: "w2d3",
-        dayName: "Thursday",
-        type: "55",
-        pltw: "Project 1.1.9: Algorithms and Art (Day 4 of 4)",
-        inClass: [
-          "Final code polish and program documentation.",
-          "Written responses drafting: Explaining how the algorithm manages complexity."
-        ],
-        apHomework: "Prepare for AP Classroom Unit 3 PPC Benchmark.",
-        assessment: "Major Project Grade: PLTW 1.1.9 Rubric (30% category weight)."
-      },
-      {
-        id: "w2d4",
-        dayName: "Friday",
-        type: "55",
-        pltw: "AP Classroom Unit 3 Benchmark & Remediation",
-        inClass: [
-          "Administer AP Classroom Personal Progress Check (PPC): Unit 3 Part 1.",
-          "In-class review of tricky multiple-choice stimulus questions."
-        ],
-        apHomework: "AP Daily Topic 3.12 (Calling Procedures - Video 1).",
-        assessment: "AP Classroom Unit 3 PPC Part 1 (15% category weight)."
-      }
-    ]
+    classDayIndex: 5,
+    type: "88",
+    pltw: "Finish 1.1.8 & Kickoff Project 1.1.9: Algorithms and Art",
+    inClass: [
+      "Block Part 1 (30m): Finalize traffic simulation code.",
+      "Block Part 2 (55m): Kickoff Project 1.1.9 (Algorithmic Art).",
+      "Draft flowcharts incorporating loops, conditionals, and variables."
+    ],
+    apHomework: "AP Daily Topic 3.1 (Variables and Assignments - Review Video 2).",
+    assessment: "Project design flowchart approval."
+  },
+  {
+    week: 2,
+    unit: "Unit 1: Creative Computing for All",
+    classDayIndex: 6,
+    type: "55",
+    pltw: "Project 1.1.9: Algorithms and Art (Studio Day 2)",
+    inClass: [
+      "Active Python turtle art coding.",
+      "Enforce mandatory features: 1 list, 1 loop, 1 conditional."
+    ],
+    apHomework: "AP Topic 3.5 & 3.8 Practice Questions on AP Classroom.",
+    assessment: "Mid-project code trace review."
+  },
+  {
+    week: 2,
+    unit: "Unit 1: Creative Computing for All",
+    classDayIndex: 7,
+    type: "55",
+    pltw: "Project 1.1.9: Algorithms and Art (Final Polish & Submission)",
+    inClass: [
+      "Program completion and written response documentation.",
+      "Explain how algorithms manage program complexity."
+    ],
+    apHomework: "Prepare for AP Classroom Unit 3 Progress Check.",
+    assessment: "Major Project Grade: PLTW 1.1.9 Rubric (30% weight)."
+  },
+
+  // WEEK 3
+  {
+    week: 3,
+    unit: "Unit 1: Lesson 1.2 Abstraction",
+    classDayIndex: 8,
+    type: "55",
+    pltw: "AP Classroom Unit 3 Benchmark Assessment",
+    inClass: [
+      "Administer AP Classroom Personal Progress Check (PPC): Unit 3 Part 1.",
+      "Classwide review of stimulus-style questions."
+    ],
+    apHomework: "AP Daily Topic 3.12 (Calling Procedures - Video 1).",
+    assessment: "AP Classroom Unit 3 PPC Part 1 (15% weight)."
   },
   {
     week: 3,
     unit: "Unit 1: Lesson 1.2 Abstraction",
-    days: [
-      {
-        id: "w3d1",
-        dayName: "Tuesday",
-        type: "55",
-        pltw: "Activity 1.2.1: Catch-A-Turtle (Day 1 of 3)",
-        inClass: [
-          "Introduction to procedural abstraction: Defining custom functions ('def').",
-          "Scope awareness: Local vs. global variable behavior."
-        ],
-        apHomework: "AP Daily Topic 3.12 (Calling Procedures - Video 2).",
-        assessment: "Formative check on function header syntax and indentation."
-      },
-      {
-        id: "w3d2",
-        dayName: "Wednesday",
-        type: "88",
-        pltw: "Activity 1.2.1: Catch-A-Turtle (Days 2 & 3 of 3)",
-        inClass: [
-          "Extended Studio: Event-driven programming (connecting click events to procedures).",
-          "Adding game timer, score counter, and dynamic turtle movement upon click."
-        ],
-        apHomework: "AP Daily Topic 3.13 (Developing Procedures - Video 1).",
-        assessment: "Check functional game prototype."
-      },
-      {
-        id: "w3d3",
-        dayName: "Thursday",
-        type: "55",
-        pltw: "Activity 1.2.2: Catch-A-Turtle Leaderboard (Day 1 of 4)",
-        inClass: [
-          "Managing complexity using data abstractions (Python Lists).",
-          "Appending scores and traversing lists using index values."
-        ],
-        apHomework: "AP Daily Topic 3.10 (Lists - Video 1).",
-        assessment: "Trace table exercise on list index positioning."
-      },
-      {
-        id: "w3d4",
-        dayName: "Friday",
-        type: "55",
-        pltw: "Activity 1.2.2: Catch-A-Turtle Leaderboard (Day 2 of 4)",
-        inClass: [
-          "File reading/writing in Python to persist leaderboard scores.",
-          "First 10 Mins: AP Topic 3.10 Questions (List indexing warm-up)."
-        ],
-        apHomework: "AP Daily Topic 3.10 (Lists - Video 2).",
-        assessment: "Topic 3.10 Warm-up Quiz score."
-      }
-    ]
+    classDayIndex: 9,
+    type: "88",
+    pltw: "Activity 1.2.1: Catch-A-Turtle (Days 1 & 2 of 3)",
+    inClass: [
+      "Extended Studio: Procedural abstraction using custom functions ('def').",
+      "Connecting event handlers (mouse clicks) to Python procedures.",
+      "Scope awareness: Local vs global variable updates."
+    ],
+    apHomework: "AP Daily Topic 3.12 (Calling Procedures - Video 2).",
+    assessment: "Formative check on procedure header syntax."
   },
   {
-    week: 4,
+    week: 3,
     unit: "Unit 1: Lesson 1.2 Abstraction",
-    days: [
-      {
-        id: "w4d1",
-        dayName: "Tuesday",
-        type: "55",
-        pltw: "Activity 1.2.2: Catch-A-Turtle Leaderboard (Days 3 & 4 of 4)",
-        inClass: [
-          "Sorting leaderboard data (combining iteration, conditionals, and lists).",
-          "Finalizing leaderboard integration into Catch-A-Turtle game."
-        ],
-        apHomework: "AP Daily Topic 3.13 (Developing Procedures - Video 2).",
-        assessment: "Activity 1.2.2 Code completion check."
-      },
-      {
-        id: "w4d2",
-        dayName: "Wednesday",
-        type: "88",
-        pltw: "Activity 1.2.3: Apple Avalanche (Days 1 & 2 of 3)",
-        inClass: [
-          "Extended Block: Procedural abstraction with parameters.",
-          "Passing arguments to procedures to handle multiple dropping apples.",
-          "Key concepts: Reusability, abstraction, parameter mapping."
-        ],
-        apHomework: "AP Daily Topic 3.14 (Libraries - Video 1).",
-        assessment: "Parameter tracing exercise on whiteboard."
-      },
-      {
-        id: "w4d3",
-        dayName: "Thursday",
-        type: "55",
-        pltw: "Activity 1.2.3: Apple Avalanche (Day 3 of 3)",
-        inClass: [
-          "Completing keypress event handlers and game reset procedures.",
-          "Debugging parameter type errors."
-        ],
-        apHomework: "AP Daily Topic 3.6 (Conditionals - Review Video 2).",
-        assessment: "Activity 1.2.3 Checkpoint rubric."
-      },
-      {
-        id: "w4d4",
-        dayName: "Friday",
-        type: "55",
-        pltw: "Activity 1.2.4: Turtle Escape (Day 1 of 3)",
-        inClass: [
-          "Complex algorithmic problem-solving: Maze generation and automated navigation.",
-          "First 10 Mins: AP Classroom Topic 3.12/3.13 Formative items."
-        ],
-        apHomework: "Review procedural abstraction notes.",
-        assessment: "AP Classroom Topic 3.12/3.13 Formative quiz."
-      }
-    ]
+    classDayIndex: 10,
+    type: "55",
+    pltw: "Activity 1.2.1: Catch-A-Turtle (Day 3 of 3)",
+    inClass: [
+      "Adding game timer loops and score counters.",
+      "Testing event binding reliability."
+    ],
+    apHomework: "AP Daily Topic 3.13 (Developing Procedures - Video 1).",
+    assessment: "Activity 1.2.1 Checkpoint."
   },
   {
-    week: 5,
-    unit: "Unit 1: Create Task Dry-Run & Unit 1 Capstone",
-    days: [
-      {
-        id: "w5d1",
-        dayName: "Tuesday",
-        type: "55",
-        pltw: "Activity 1.2.4: Turtle Escape (Days 2 & 3 of 3)",
-        inClass: [
-          "Finalizing automated maze solver logic.",
-          "Comparing student algorithm efficiencies."
-        ],
-        apHomework: "Read official AP CSP Create PT Student Guidelines.",
-        assessment: "Activity 1.2.4 Submission."
-      },
-      {
-        id: "w5d2",
-        dayName: "Wednesday",
-        type: "88",
-        pltw: "Project 1.2.5: Practice Create Task — 'Shall We Play a Game?' (Days 1 & 2 of 4)",
-        inClass: [
-          "Practice Create PT Kickoff: Designing a game meeting exact AP requirements.",
-          "Requirements: (1) List, (2) Procedure w/ parameter, (3) Selection, (4) Iteration.",
-          "Extended block studio: Architectural layout and list construction."
-        ],
-        apHomework: "Review AP Create PT Scoring Guidelines sample submissions.",
-        assessment: "Project design proposal sign-off."
-      },
-      {
-        id: "w5d3",
-        dayName: "Thursday",
-        type: "55",
-        pltw: "Project 1.2.5: Practice Create Task (Day 3 of 4)",
-        inClass: [
-          "Active coding studio and procedure debugging.",
-          "Drafting written explanations for procedure algorithm logic."
-        ],
-        apHomework: "AP Daily Create PT Overview Video 1.",
-        assessment: "Mid-project code trace check."
-      },
-      {
-        id: "w5d4",
-        dayName: "Friday",
-        type: "55",
-        pltw: "Project 1.2.5: Practice Create Task (Day 4 of 4)",
-        inClass: [
-          "Finalizing code, recording 1-minute screen capture video.",
-          "Peer scoring using official AP Create PT Rubric."
-        ],
-        apHomework: "Prepare for Unit 1 Summative Exam.",
-        assessment: "Graded via official AP Create PT Rubric (30% weight)."
-      }
-    ]
+    week: 3,
+    unit: "Unit 1: Lesson 1.2 Abstraction",
+    classDayIndex: 11,
+    type: "55",
+    pltw: "Activity 1.2.2: Catch-A-Turtle Leaderboard (Day 1 of 4)",
+    inClass: [
+      "Data abstraction with Python Lists.",
+      "Appending scores and traversing elements via index values."
+    ],
+    apHomework: "AP Daily Topic 3.10 (Lists - Video 1).",
+    assessment: "Trace table exercise on list indexes."
   }
 ];
 
 let currentOffset = parseInt(localStorage.getItem('ap_csp_offset')) || 0;
 let completedDays = JSON.parse(localStorage.getItem('ap_csp_completed')) || {};
+
+function getClassDate(classDayIndex) {
+  // Apply the schedule shift offset to shift the class day target
+  const shiftedIndex = classDayIndex + currentOffset;
+  
+  let date = new Date(BASE_DATE.getTime());
+  let count = 0;
+  
+  if (shiftedIndex >= 0) {
+    while (count < shiftedIndex) {
+      date.setDate(date.getDate() + 1);
+      let day = date.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+      if (day === 2 || day === 3 || day === 4 || day === 5) {
+        count++;
+      }
+    }
+  } else {
+    while (count > shiftedIndex) {
+      date.setDate(date.getDate() - 1);
+      let day = date.getDay();
+      if (day === 2 || day === 3 || day === 4 || day === 5) {
+        count--;
+      }
+    }
+  }
+  return date;
+}
+
+function formatDate(date) {
+  const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+  return date.toLocaleDateString('en-US', options);
+}
+
+function isSameDate(d1, d2) {
+  return d1.getFullYear() === d2.getFullYear() &&
+         d1.getMonth() === d2.getMonth() &&
+         d1.getDate() === d2.getDate();
+}
 
 function saveState() {
   localStorage.setItem('ap_csp_offset', currentOffset);
@@ -414,7 +332,7 @@ function resetOffset() {
 
 function updateOffsetLabel() {
   const label = document.getElementById('offset-label');
-  label.textContent = `${currentOffset >= 0 ? '+' : ''}${currentOffset} Days`;
+  label.textContent = `${currentOffset >= 0 ? '+' : ''}${currentOffset} Class Days`;
 }
 
 function toggleDayComplete(id) {
@@ -423,20 +341,25 @@ function toggleDayComplete(id) {
   renderSchedule();
 }
 
-function updateProgressBar(total, completed) {
-  const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
-  document.getElementById('progress-bar').style.width = `${percentage}%`;
-}
-
 function renderSchedule() {
   const container = document.getElementById('schedule-container');
   const searchFilter = document.getElementById('search-input').value.toLowerCase();
+  const today = new Date(2026, 9, 22); // Oct 22, 2026
+  
   container.innerHTML = '';
 
-  let totalDays = 0;
-  let completedCount = 0;
+  // Group by week
+  const weeksMap = {};
+  masterClassSequence.forEach((item, index) => {
+    item.cardId = `day_${index}`;
+    item.computedDate = getClassDate(item.classDayIndex);
+    if (!weeksMap[item.week]) {
+      weeksMap[item.week] = { week: item.week, unit: item.unit, days: [] };
+    }
+    weeksMap[item.week].days.push(item);
+  });
 
-  masterSchedule.forEach(weekData => {
+  Object.values(weeksMap).forEach(weekData => {
     let weekHasMatches = false;
 
     const weekEl = document.createElement('div');
@@ -454,12 +377,10 @@ function renderSchedule() {
     daysGrid.className = 'days-grid';
 
     weekData.days.forEach(day => {
-      totalDays++;
-      const isDone = !!completedDays[day.id];
-      if (isDone) completedCount++;
+      const isDone = !!completedDays[day.cardId];
+      const isToday = isSameDate(day.computedDate, today);
 
-      // Search matching logic
-      const searchText = `${day.pltw} ${day.inClass.join(' ')} ${day.apHomework} ${day.assessment}`.toLowerCase();
+      const searchText = `${day.pltw} ${day.inClass.join(' ')} ${day.apHomework} ${day.assessment} ${formatDate(day.computedDate)}`.toLowerCase();
       if (searchFilter && !searchText.includes(searchFilter)) {
         return;
       }
@@ -467,16 +388,17 @@ function renderSchedule() {
 
       const isBlock = day.type === "88";
       const card = document.createElement('div');
-      card.className = `day-card ${isBlock ? 'block-day' : ''} ${isDone ? 'completed' : ''}`;
+      card.className = `day-card ${isBlock ? 'block-day' : ''} ${isToday ? 'is-today' : ''} ${isDone ? 'completed' : ''}`;
 
       card.innerHTML = `
         <div class="day-header">
-          <span class="day-name">
-            ${day.dayName}
+          <span class="day-date">${formatDate(day.computedDate)}</span>
+          <div style="display: flex; gap: 4px; align-items: center;">
+            ${isToday ? '<span class="today-tag">TODAY</span>' : ''}
             <span class="day-badge ${isBlock ? 'badge-88' : 'badge-55'}">
-              ${isBlock ? '88 min Block' : '55 min'}
+              ${isBlock ? '88m Block' : '55m'}
             </span>
-          </span>
+          </div>
         </div>
 
         <div class="pltw-topic">${day.pltw}</div>
@@ -495,12 +417,12 @@ function renderSchedule() {
 
         <div>
           <div class="section-title">Assessment & Grading</div>
-          <div style="font-size: 0.82rem; color: #475569;">${day.assessment}</div>
+          <div style="font-size: 0.81rem; color: #475569;">${day.assessment}</div>
         </div>
 
         <div class="card-footer">
           <label class="checkbox-label">
-            <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleDayComplete('${day.id}')">
+            <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleDayComplete('${day.cardId}')">
             ${isDone ? 'Completed' : 'Mark Complete'}
           </label>
         </div>
@@ -514,11 +436,8 @@ function renderSchedule() {
       container.appendChild(weekEl);
     }
   });
-
-  updateProgressBar(totalDays, completedCount);
 }
 
-// Initial initialization
 updateOffsetLabel();
 renderSchedule();
 </script>
